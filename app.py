@@ -11,12 +11,12 @@ st.set_page_config(page_title="Analyse Financière Départementale", layout="wid
 # --- 2. CHARGEMENT DES DONNÉES ---
 @st.cache_data
 def load_data():
-    return pd.read_csv("ofgl-base-departements.csv", sep=",", low_memory=False)
+    return pd.read_zip("ofgl-base-departements.zip", sep=",", low_memory=False)
 
 try:
     df = load_data()
 except FileNotFoundError:
-    st.error("Le fichier 'ofgl-base-departements.csv' est introuvable. Placez-le dans le même dossier que ce script (avec le même nom affiché ici).")
+    st.error("Le fichier 'ofgl-base-departements.zip' est introuvable. Placez-le dans le même dossier que ce script (avec le même nom affiché ici).")
     st.stop()
 
 
