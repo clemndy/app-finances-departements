@@ -19,6 +19,10 @@ except FileNotFoundError:
     st.error("Le fichier 'ofgl-base-departements.zip' est introuvable. Placez-le dans le même dossier que ce script (avec le même nom affiché ici).")
     st.stop()
 
+# --- RÉCUPÉRATION DES ANNÉES MIN ET MAX ---
+min_annee = int(df["Exercice"].min())
+max_annee = int(df["Exercice"].max())
+
 
 # --- 3. VOS FONCTIONS ADAPTÉES POUR STREAMLIT ---
 
@@ -55,11 +59,16 @@ def departements_meme_strate(code_dep, mm_region=False):
     df_resultat = df_resultat[df_resultat["Code Insee 2024 Département"] != code_dep]
     return df_resultat.reset_index(drop=True)
 
-def comparer_departements(code_dep1, code_dep2):
+def comparer_departements(code_dep1, code_dep2, intervalle_annees):
     df["Code Insee 2024 Département"] = df["Code Insee 2024 Département"].astype(str)
     code_dep1, code_dep2 = str(code_dep1), str(code_dep2)
+    annee_min, annee_max = intervalle_annees
     
-    serie_filtre = (df["Type de budget"] == "Budget principal") & (df["Code Insee 2024 Département"].isin([code_dep1, code_dep2]))
+    # Ajout du filtre sur les années ici
+    serie_filtre = (df["Type de budget"] == "Budget principal") & \
+                   (df["Code Insee 2024 Département"].isin([code_dep1, code_dep2])) & \
+                   (df["Exercice"] >= annee_min) & (df["Exercice"] <= annee_max)
+                   
     pivot = df[serie_filtre].pivot_table(index=["Exercice", "Nom 2024 Département"], columns="Agrégat", values="Montant", aggfunc="sum").reset_index()
 
     pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda row: row["Encours de dette"] / row["Epargne brute"] if row["Epargne brute"] != 0 else np.nan, axis=1)
@@ -100,14 +109,20 @@ def comparer_departements(code_dep1, code_dep2):
     df_final = pivot[[c for c in colonnes if c in pivot.columns]].round(1)
     return fig, df_final
 
-def comparer_departement_strate(code_dep):
+def comparer_departement_strate(code_dep, intervalle_annees):
     df["Code Insee 2024 Département"] = df["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
+    annee_min, annee_max = intervalle_annees
+    
     df_dep_cible = df[df["Code Insee 2024 Département"] == code_dep]
     strate = df_dep_cible["Strate population 2024"].iloc[0]
     nom_dep = df_dep_cible["Nom 2024 Département"].iloc[0]
     
-    serie_filtre = (df["Type de budget"] == "Budget principal") & (df["Strate population 2024"] == strate)
+    # Ajout du filtre sur les années ici
+    serie_filtre = (df["Type de budget"] == "Budget principal") & \
+                   (df["Strate population 2024"] == strate) & \
+                   (df["Exercice"] >= annee_min) & (df["Exercice"] <= annee_max)
+                   
     pivot = df[serie_filtre].pivot_table(index=["Exercice", "Code Insee 2024 Département", "Nom 2024 Département"], columns="Agrégat", values="Montant", aggfunc="sum").reset_index()
 
     pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda row: row["Encours de dette"] / row["Epargne brute"] if row["Epargne brute"] != 0 else np.nan, axis=1)
@@ -149,15 +164,20 @@ def comparer_departement_strate(code_dep):
     df_final = df_plot[[c for c in colonnes if c in df_plot.columns]].round(1)
     return fig, df_final
 
-def comparer_departement_strate_metro(code_dep):
+def comparer_departement_strate_metro(code_dep, intervalle_annees):
     df["Code Insee 2024 Département"] = df["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
+    annee_min, annee_max = intervalle_annees
     
     df_dep_cible = df[df["Code Insee 2024 Département"] == code_dep]
     strate = df_dep_cible["Strate population 2024"].iloc[0]
     nom_dep = df_dep_cible["Nom 2024 Département"].iloc[0]
     
-    serie_filtre = (df["Type de budget"] == "Budget principal") & ((df["Outre-mer"] == "Non") | (df["Code Insee 2024 Département"] == code_dep))
+    # Ajout du filtre sur les années ici
+    serie_filtre = (df["Type de budget"] == "Budget principal") & \
+                   ((df["Outre-mer"] == "Non") | (df["Code Insee 2024 Département"] == code_dep)) & \
+                   (df["Exercice"] >= annee_min) & (df["Exercice"] <= annee_max)
+                   
     pivot = df[serie_filtre].pivot_table(index=["Exercice", "Code Insee 2024 Département", "Nom 2024 Département", "Strate population 2024", "Outre-mer"], columns="Agrégat", values="Montant", aggfunc="sum").reset_index()
 
     pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda row: row["Encours de dette"] / row["Epargne brute"] if row["Epargne brute"] != 0 else np.nan, axis=1)
@@ -204,7 +224,7 @@ def comparer_departement_strate_metro(code_dep):
     colonnes = ["Exercice", "Nom 2024 Département", "Epargne brute (M€)", "Capacité d'autofinancement (M€)", "Capacité de désendettement (années)", "Poids des AIS (%)"]
     df_final = df_plot[[c for c in colonnes if c in df_plot.columns]].round(1)
     
-    return fig, df_final  # Correction ici : votre code original retournait un vide !
+    return fig, df_final 
 
 
 # --- 4. L'INTERFACE GRAPHIQUE UTILISATEUR ---
@@ -234,19 +254,17 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-# 2. On crée le menu radio, mais on cache son titre d'origine avec label_visibility="collapsed"
+# 2. On crée le menu radio
 menu = st.sidebar.radio(
-    label="Menu caché", # Obligatoire pour Streamlit, mais il ne sera pas affiché
+    label="Menu caché",
     options=[
         "Recherche départements de même strate", 
         "Comparaison d'indicateurs financiers entre 2 départements", 
         "Comparaison d'indicateurs financiers entre un département et la moyenne de sa strate",
         "Comparaison d'indicateurs financiers entre un département, la moyenne de sa strate et la moyenne de la métropole"
     ],
-    label_visibility="collapsed" # <-- L'astuce pour cacher le petit titre est ici !
+    label_visibility="collapsed" 
 )
-
-st.write("---")
 
 st.write("---")
 
@@ -274,8 +292,12 @@ elif menu == "Comparaison d'indicateurs financiers entre 2 départements":
     with col2:
         dep2 = st.selectbox("Second département :", liste_deps, index=1)
         
+    # --- AJOUT DU SLIDER ICI ---
+    annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
+                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+        
     if st.button("Lancer la comparaison"):
-        fig, data = comparer_departements(dep1, dep2)
+        fig, data = comparer_departements(dep1, dep2, annees_sel)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
@@ -283,9 +305,13 @@ elif menu == "Comparaison d'indicateurs financiers entre 2 départements":
 elif menu == "Comparaison d'indicateurs financiers entre un département et la moyenne de sa strate":
     st.header("📈 Comparaison d'un département à sa strate")
     dep = st.selectbox("Sélectionnez le département :", liste_deps)
+    
+    # --- AJOUT DU SLIDER ICI ---
+    annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
+                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
         
     if st.button("Générer l'analyse"):
-        fig, data = comparer_departement_strate(dep)
+        fig, data = comparer_departement_strate(dep, annees_sel)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
@@ -293,9 +319,13 @@ elif menu == "Comparaison d'indicateurs financiers entre un département et la m
 elif menu == "Comparaison d'indicateurs financiers entre un département, la moyenne de sa strate et la moyenne de la métropole":
     st.header("🏢 Comparaison : Département VS Strate VS Métropole")
     dep = st.selectbox("Sélectionnez le département :", liste_deps)
+    
+    # --- AJOUT DU SLIDER ICI ---
+    annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
+                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
         
     if st.button("Générer l'analyse complète"):
-        fig, data = comparer_departement_strate_metro(dep)
+        fig, data = comparer_departement_strate_metro(dep, annees_sel)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
