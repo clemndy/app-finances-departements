@@ -305,4 +305,3 @@ elif menu == "Comparaison d'indicateurs financiers entre un département, la moy
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
-        
