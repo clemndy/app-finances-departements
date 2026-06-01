@@ -25,7 +25,7 @@ max_annee = int(df_main["Exercice"].max())
 
 # Fonction de génération des graphiques
 def generer_graphiques(df_plot, titre):
-    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    fig, axes = plt.subplots(2, 2, figsize=(16, 9))
     fig.suptitle(titre, fontsize=25, fontweight="bold", y=0.98)
 
     # Graphique 1 : épargne brute
