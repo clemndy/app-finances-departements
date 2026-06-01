@@ -4,8 +4,8 @@ import seaborn as sns
 import numpy as np
 import streamlit as st
 
-# CONFIGURATION DE LA PAGE WEB
-st.set_page_config(page_title="AAAAAAAnalyse Financière Départementale", page_icon="📊")
+# Configuration page web
+st.set_page_config(page_title="Analyse financière départementale", page_icon="📊")
 
 # --- 2. CHARGEMENT DES DONNÉES ---
 @st.cache_data
