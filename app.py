@@ -5,7 +5,7 @@ import numpy as np
 import streamlit as st
 
 # Configuration page web
-st.set_page_config(page_title="Analyse financière départementale", page_icon="📊")
+st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
 
 # Chargement données et on les garde en mémoire vive
 @st.cache_data
