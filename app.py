@@ -12,8 +12,7 @@ st.set_page_config(page_title="Analyse financière départementale", page_icon="
 def load_data():
     return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
 
-# Prévention d'erreurs, je ne le fais pas habituellement mais pour un code
-# "pro", c'est intéressant
+# Prévention d'erreurs, je ne le fais pas habituellement mais pour un code "pro", c'est intéressant
 try:
     df_main = load_data()
 except FileNotFoundError:
@@ -27,7 +26,7 @@ max_annee = int(df_main["Exercice"].max())
 # Foncition de génération des graphiques
 def generer_graphiques(df_plot, titre):
     """Génère les 4 graphiques standardisés pour éviter la répétition de code."""
-    fig, axes = plt.subplots(2, 2)
+    fig, axes = plt.subplots(2, 2, figsize=(20,))
     fig.suptitle(titre, fontsize=25, fontweight="bold", y=0.98)
 
     # Graphique 1 : Épargne brute
