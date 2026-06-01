@@ -12,7 +12,7 @@ st.set_page_config(page_title="Analyse financière départementale", page_icon="
 def load_data():
     return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
 
-# Prévention d'erreurs, je ne le fais pas habituellement mais pour un code "pro", c'est intéressant
+# Prévention d'erreurs
 try:
     df_main = load_data()
 except FileNotFoundError:
@@ -23,14 +23,14 @@ except FileNotFoundError:
 min_annee = int(df_main["Exercice"].min())
 max_annee = int(df_main["Exercice"].max())
 
-# Foncition de génération des graphiques
+# Fonction de génération des graphiques
 def generer_graphiques(df_plot, titre):
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle(titre, fontsize=25, fontweight="bold", y=0.98)
 
-    # Graphique 1 : Épargne brute
-    sns.lineplot(data=df_plot, x="Exercice", hue="Nom département (2024)", marker="o", ax=axes[0, 0], linewidth=3)
-    axes[0, 0].set_title("Épargne brute (M€)", fontsize=50, fontweight="semibold")
+    # Graphique 1 : Épargne brute (CORRIGÉ : Ajout de l'axe y et correction du hue)
+    sns.lineplot(data=df_plot, x="Exercice", y="Epargne brute (M€)", hue="Nom 2024 Département", marker="o", ax=axes[0, 0], linewidth=3)
+    axes[0, 0].set_title("Épargne brute (M€)", fontsize=20, fontweight="semibold")
     axes[0, 0].set_xticks(df_plot["Exercice"].unique())
     
     # Graphique 2 : Épargne nette
@@ -78,7 +78,6 @@ def ajouter_etiquettes_desendettement(ax, df_donnees):
                 fontsize=9, color="white", fontweight="bold",
                 bbox=dict(boxstyle="round,pad=0.3", fc="black", ec="none", alpha=0.7)
             )
-
 
 
 # --- 4. FONCTIONS DE TRAITEMENT DES DONNÉES ---
