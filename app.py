@@ -28,28 +28,25 @@ def generer_graphiques(df_plot, titre):
     fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle(titre, fontsize=25, fontweight="bold", y=0.98)
 
-    # Graphique 1 : Épargne brute (CORRIGÉ : Ajout de l'axe y et correction du hue)
+    # Graphique 1 : épargne brute
     sns.lineplot(data=df_plot, x="Exercice", y="Epargne brute (M€)", hue="Nom 2024 Département", marker="o", ax=axes[0, 0], linewidth=3)
     axes[0, 0].set_title("Épargne brute (M€)", fontsize=20, fontweight="semibold")
     axes[0, 0].set_xticks(df_plot["Exercice"].unique())
     
-    # Graphique 2 : Épargne nette
+    # Graphique 2 : épargne nette
     sns.lineplot(data=df_plot, x="Exercice", y="Epargne nette (M€)", hue="Nom 2024 Département", marker="o", ax=axes[0, 1], linewidth=3)
     axes[0, 1].set_title("Épargne Nette (M€)")
     axes[0, 1].set_xticks(df_plot["Exercice"].unique())
 
-    # Graphique 3 : Capacité de désendettement
+    # Graphique 3 : capacité de désendettement (= encours de dette / épargne brute)
     sns.lineplot(data=df_plot, x="Exercice", y="Capacité de désendettement (années)", hue="Nom 2024 Département", marker="o", ax=axes[1, 0], linewidth=3)
     axes[1, 0].set_title("Capacité de désendettement (années)")
-    axes[1, 0].axhline(12, color="darkred", linestyle="--", linewidth=1.5, label="Surendettement avéré (à réduire)")
-    axes[1, 0].axhline(9, color="red", linestyle="--", linewidth=1.5, label="Surendettement trop élevé (à réduire)")
-    axes[1, 0].axhline(6, color="darkorange", linestyle="--", linewidth=1.5, label="Surendettement élevé (à résorber)")
-    axes[1, 0].axhline(3, color="green", linestyle="--", linewidth=1.5, label="Endettement maîtrisé (à maintenir)")
+    axes[1, 0].axhline(12, color="darkred", linestyle="--", linewidth=0.5, label="Surendettement avéré (à réduire)")
+    axes[1, 0].axhline(9, color="red", linestyle="--", linewidth=0.5, label="Surendettement trop élevé (à réduire)")
+    axes[1, 0].axhline(6, color="darkorange", linestyle="--", linewidth=0.5, label="Surendettement élevé (à résorber)")
+    axes[1, 0].axhline(3, color="green", linestyle="--", linewidth=0.5, label="Endettement maîtrisé (à maintenir)")
     axes[1, 0].set_xticks(df_plot["Exercice"].unique())
-    
-    # On gère l'affichage de la légende proprement s'il y a des courbes
-    if axes[1,0].get_legend() is not None:
-        axes[1, 0].legend(loc='upper right', fontsize='small')
+    axes[1, 0].legend(loc='upper right', fontsize='small')
         
     ajouter_etiquettes_desendettement(axes[1, 0], df_plot)
 
