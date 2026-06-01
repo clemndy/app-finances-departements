@@ -30,7 +30,7 @@ def generer_graphiques(df_plot, titre):
 
     # Graphique 1 : Épargne brute
     sns.lineplot(data=df_plot, x="Exercice", hue="Nom département (2024)", marker="o", ax=axes[0, 0], linewidth=3)
-    axes[0, 0].set_title("Épargne brute (M€)", fontsize=20, fontweight="semibold")
+    axes[0, 0].set_title("Épargne brute (M€)", fontsize=50, fontweight="semibold")
     axes[0, 0].set_xticks(df_plot["Exercice"].unique())
     
     # Graphique 2 : Épargne nette
