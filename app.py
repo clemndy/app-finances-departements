@@ -67,7 +67,7 @@ def generer_graphiques(df_plot, titre, indicateurs):
             if ax.get_legend() is not None:
                 ax.legend(loc="best", fontsize="small")
 
-
+    plt.tight_layout()
     return fig
 
 
