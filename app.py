@@ -4,8 +4,24 @@ import seaborn as sns
 import numpy as np
 import streamlit as st
 
+# Chargement données et on les garde en mémoire vive
+@st.cache_data
+def load_data():
+    return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
+
+# Prévention d'erreurs
+try:
+    df = load_data()
+except FileNotFoundError:
+    st.error("Le fichier 'ofgl-base-departements.zip' est introuvable. Contactez l'administrateur du site.")
+    st.stop()
+
+
+
 # Configuration page web
 st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
+
+
 
 # Indicateurs par défaut
 indicateurs_defaut = [
@@ -18,18 +34,6 @@ indicateurs_defaut = [
 liste_agregats = [elt for elt in df["Agrégat"]]
 
 indiacteurs = sorted(list(set(indicateurs_defaut + liste_agregats)))
-
-# Chargement données et on les garde en mémoire vive
-@st.cache_data
-def load_data():
-    return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
-
-# Prévention d'erreurs
-try:
-    df = load_data()
-except FileNotFoundError:
-    st.error("Le fichier 'ofgl-base-departements.zip' est introuvable. Contactez l'administrateur du site.")
-    st.stop()
 
 # On stocke les variables min_annee et max_annee
 min_annee = int(df["Exercice"].min())
