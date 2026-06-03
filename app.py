@@ -26,14 +26,14 @@ def load_data():
 
 # Prévention d'erreurs
 try:
-    df_main = load_data()
+    df = load_data()
 except FileNotFoundError:
     st.error("Le fichier 'ofgl-base-departements.zip' est introuvable. Contactez l'administrateur du site.")
     st.stop()
 
 # On stocke les variables min_annee et max_annee
-min_annee = int(df_main["Exercice"].min())
-max_annee = int(df_main["Exercice"].max())
+min_annee = int(df["Exercice"].min())
+max_annee = int(df["Exercice"].max())
 
 # Fonction de génération des graphiques dynamique
 def generer_graphiques(df_plot, titre, indicateurs):
@@ -252,7 +252,7 @@ st.title("📊 Outil d'analyse financière de départements")
 st.markdown("Bienvenue dans l'interface d'analyse. Choisissez une fonctionnalité du magnifique menu situé à votre gauche.")
 
 # Liste des départements pour les menus déroulants
-liste_deps = sorted(df_main["Code Insee 2024 Département"].astype(str).unique())
+liste_deps = sorted(df["Code Insee 2024 Département"].astype(str).unique())
 
 st.markdown("""
     <style>
@@ -314,7 +314,7 @@ if menu == "Recherche départements de même strate":
         meme_region = st.checkbox("Restreindre à la même région uniquement")
     
     if st.button("Chercher les correspondances"):
-        resultat = departements_meme_strate(df_main, dep, meme_region)
+        resultat = departements_meme_strate(df, dep, meme_region)
         if not resultat.empty:
             st.success(f"Voici les départements trouvés ({len(resultat)}) :")
             st.dataframe(resultat, use_container_width=True)
@@ -333,7 +333,7 @@ elif menu == "Comparaison d'indicateurs financiers entre 2 départements":
                            min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
         
     if st.button("Lancer la comparaison"):
-        fig, data = comparer_departements(df_main, dep1, dep2, annees_sel, indicateurs_choisis)
+        fig, data = comparer_departements(df, dep1, dep2, annees_sel, indicateurs_choisis)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
@@ -352,7 +352,7 @@ elif menu == "Comparaison d'indicateurs financiers entre un département et la m
                            min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
         
     if st.button("Générer l'analyse"):
-        fig, data = comparer_departement_strate(df_main, dep, annees_sel, indicateurs_choisis, meme_region)
+        fig, data = comparer_departement_strate(df, dep, annees_sel, indicateurs_choisis, meme_region)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
@@ -371,7 +371,7 @@ elif menu == "Comparaison d'indicateurs financiers entre un département, la moy
                            min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
         
     if st.button("Générer l'analyse complète"):
-        fig, data = comparer_departement_strate_metro(df_main, dep, annees_sel, indicateurs_choisis, meme_region)
+        fig, data = comparer_departement_strate_metro(df, dep, annees_sel, indicateurs_choisis, meme_region)
         st.pyplot(fig)
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
