@@ -89,7 +89,7 @@ def ajouter_etiquettes_desendettement(ax, df_donnees):
                 vraie_valeur_texte, xy=(row["Exercice"], 0), xytext=(0, 10),
                 textcoords="offset points", ha="center", va="bottom",
                 fontsize=10, color="white", fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.5", fc="black", alpha=0.75, edgecolor="red", linewidth=5)
+                bbox=dict(boxstyle="round,pad=0.5", fc="black", alpha=0.75, edgecolor="red", linewidth=3)
             )
 
 
