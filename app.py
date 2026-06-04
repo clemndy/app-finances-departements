@@ -78,7 +78,7 @@ def generer_graphiques(df_plot, titre, indicateurs):
 
 def ajouter_etiquettes_desendettement(ax, df_donnees):
     for index, row in df_donnees.iterrows():
-        if ro.get("Capacité de désendettement (années)", -1) == 0:
+        if row.get("Capacité de désendettement (années)", -1) == 0:
             vraie_valeur = row.get("Capacité de désendettement (vraie)", np.nan)
             if pd.isna(vraie_valeur) or np.isinf(vraie_valeur):
                 vraie_valeur_texte = "inf"
