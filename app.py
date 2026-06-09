@@ -43,11 +43,17 @@ max_annee = int(df["Exercice"].max())
 
 # Fonction de génération des graphiques dynamique
 def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False):
-    fig, axes = plt.subplots(2, 2, figsize=(16, 9))
-    fig.suptitle(titre, fontsize=25, fontweight="bold", y=0.98)
+    # Calcul dynamique des lignes et colonnes en fonction du nombre d'indicateurs
+    n = len(indicateurs)
+    cols = 2 if n >= 2 else 1
+    rows = (n + cols - 1) // cols
+    
+    # La hauteur de la figure s'adapte au nombre de lignes (5 par ligne)
+    fig, axes = plt.subplots(rows, cols, figsize=(16, 5 * rows))
+    fig.suptitle(titre, fontsize=25, fontweight="bold", y=1.02) # Légèrement remonté pour éviter que le titre écrase le 1er graph
 
-    # On aplatit la matrice 2x2 en une liste de 4 cases pour boucler plus facilement
-    axes_flat = axes.flatten()
+    # On sécurise l'aplatissement (gère le fait qu'il y ait 1, 2 ou 10 graphiques)
+    axes_flat = np.array(axes).flatten()
 
     for i, ind in enumerate(indicateurs):
         ax = axes_flat[i]
@@ -73,6 +79,10 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False):
             ajouter_etiquettes_desendettement(ax, df_plot)
             if ax.get_legend() is not None:
                 ax.legend(loc="best", fontsize="small")
+
+    # Nettoyage : si on a généré des cases vides (ex: 3 indicateurs créent une grille 2x2), on supprime la case en trop
+    for j in range(n, len(axes_flat)):
+        fig.delaxes(axes_flat[j])
 
     plt.tight_layout()
     return fig
@@ -322,10 +332,10 @@ st.sidebar.markdown(
 
 # Ajout du multi-select pour choisir les graphiques
 indicateurs_choisis = st.sidebar.multiselect(
-    "Choisissez exactement 4 indicateurs à visualiser :",
+    "Choisissez les indicateurs à visualiser :",
     options=indiacteurs,
-    default=indicateurs_fait_main,
-    max_selections=4
+    default=indicateurs_fait_main
+    # max_selections retiré ici
 )
 
 par_habitant = st.sidebar.checkbox("Afficher les données en par habitant (€/hab)")
@@ -349,9 +359,9 @@ menu = st.sidebar.radio(
 
 st.write("---")
 
-# Sécurité : vérifier que 4 indicateurs sont bien sélectionnés
-if menu != "Recherche départements de même strate" and len(indicateurs_choisis) != 4:
-    st.warning("⚠️ Veuillez sélectionner **exactement 4 indicateurs** dans le panneau latéral de gauche pour générer les graphiques.")
+# Sécurité : vérifier qu'au moins 1 indicateur est sélectionné
+if menu != "Recherche départements de même strate" and len(indicateurs_choisis) == 0:
+    st.warning("⚠️ Veuillez sélectionner **au moins 1 indicateur** dans le panneau latéral de gauche pour générer les graphiques.")
     st.stop()
 
 
