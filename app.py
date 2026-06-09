@@ -10,7 +10,7 @@ import streamlit as st
 @st.cache_data
 def load_data():
     return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
-
+7
 # Prévention d'erreurs
 try:
     df = load_data()
@@ -34,16 +34,28 @@ indicateurs_fait_main = [
 # --- Fonction de catégorisation ---
 def categoriser_indicateur(ind):
     ind_l = ind.lower()
+    
+    # 1. Épargne (Très spécifique)
     if any(x in ind_l for x in ["épargne", "epargne", "désendettement", "fonds de roulement", "financement", "besoin"]):
         return "1️⃣ Épargne & Résultats"
-    elif any(x in ind_l for x in ["recette", "dotation", "impôt", "taxe", "tva", "dmto", "cvae", "ticpe", "tsca", "fiscal", "fctva", "fmdi", "péreq", "compensation", "vente", "produit"]):
-        return "2️⃣ Recettes & Fiscalité"
-    elif any(x in ind_l for x in ["dépense", "achat", "frais", "subvention", "personnel", "sdis", "ddec", "travaux", "charge", "intervention"]):
-        return "3️⃣ Dépenses"
+        
+    # 4. Social (Placé en haut pour capter "frais d'hébergement" avant le mot "frais")
     elif any(x in ind_l for x in ["allocation", "ais", "cnsa", "hébergement", "social"]):
         return "4️⃣ Social & Solidarité"
-    elif any(x in ind_l for x in ["dette", "emprunt", "trésorerie", "financière", "financier", "gad", "annuité"]):
+        
+    # 5. Dette & Trésorerie (Placé avant dépenses pour capter "charges financières" ou "dépôts")
+    elif any(x in ind_l for x in ["dette", "emprunt", "trésorerie", "financière", "financier", "gad", "annuité", "dépôt", "trésor"]):
         return "5️⃣ Dette & Trésorerie"
+        
+    # 2. Recettes (Ajout de "concours" et "subventions reçues")
+    elif any(x in ind_l for x in ["recette", "dotation", "impôt", "taxe", "tva", "dmto", "cvae", "ticpe", "tsca", "fiscal", "fctva", "fmdi", "péreq", "compensation", "vente", "produit", "concours", "subventions reçues"]):
+        return "2️⃣ Recettes & Fiscalité"
+        
+    # 3. Dépenses (Prend tout le reste des charges, dont les "subventions" classiques versées)
+    elif any(x in ind_l for x in ["dépense", "achat", "frais", "subvention", "personnel", "sdis", "ddec", "travaux", "charge", "intervention"]):
+        return "3️⃣ Dépenses"
+        
+    # Sécurité au cas où l'OFGL ajoute un nouveau mot inconnu l'année prochaine
     else:
         return "6️⃣ Autres"
 
