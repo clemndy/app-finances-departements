@@ -10,7 +10,7 @@ import streamlit as st
 @st.cache_data
 def load_data():
     return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
-7
+
 # Prévention d'erreurs
 try:
     df = load_data()
@@ -141,6 +141,60 @@ def ajouter_etiquettes_desendettement(ax, df_donnees):
 
 
 # Nos fonctions correspondant aux différentes fonctionalités du site
+
+def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
+    """Nouvelle fonction pour tracer les indicateurs d'un seul département"""
+    df_temp = df.copy()
+    df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
+    code_dep = str(code_dep)
+    annee_min, annee_max = intervalle_annees
+    
+    serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
+                   (df_temp["Code Insee 2024 Département"] == code_dep) & \
+                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   
+    idx_cols = ["Exercice", "Nom 2024 Département"]
+    if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
+
+    pivot = df_temp[serie_filtre].pivot_table(index=idx_cols, columns="Agrégat", values="Montant", aggfunc="sum").reset_index()
+
+    if pivot.empty: return None, pd.DataFrame()
+    
+    nom_dep = pivot["Nom 2024 Département"].iloc[0]
+
+    pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda row: row.get("Encours de dette", 0) / row["Epargne brute"] if row.get("Epargne brute", 0) != 0 else np.nan, axis=1)
+    pivot["Capacité de désendettement (années)"] = pivot.apply(lambda row: row.get("Encours de dette", 0) / row["Epargne brute"] if row.get("Epargne brute", 0) > 0 else 0, axis=1)
+    pivot["Epargne brute (M€)"] = pivot.get("Epargne brute", 0) / 1000000
+    pivot["Epargne nette (M€)"] = pivot.get("Epargne nette", 0) / 1000000
+    pivot["Dépenses sociales (AIS)"] = pivot.get("Allocations RSA", 0) + pivot.get("Allocations APA", 0) + pivot.get("Allocations PCH", 0)
+    pivot["Poids des AIS (%)"] = (pivot["Dépenses sociales (AIS)"] / pivot.get("Dépenses de fonctionnement", 1)) * 100
+
+    indicateurs_a_tracer = indicateurs.copy()
+    
+    if par_habitant and "Population totale" in pivot.columns:
+        if afficher_les_deux:
+            indicateurs_a_tracer = []
+            for ind in indicateurs:
+                indicateurs_a_tracer.append(ind)
+                if ind not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"] and ind in pivot.columns:
+                    nom_hab = f"{ind} (€/hab)"
+                    pivot[nom_hab] = pivot.apply(lambda row: row[ind] / row["Population totale"] if pd.notnull(row.get("Population totale")) and row["Population totale"] > 0 else np.nan, axis=1)
+                    indicateurs_a_tracer.append(nom_hab)
+        else:
+            for ind in indicateurs:
+                if ind not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"] and ind in pivot.columns:
+                    pivot[ind] = pivot.apply(lambda row: row[ind] / row["Population totale"] if pd.notnull(row.get("Population totale")) and row["Population totale"] > 0 else np.nan, axis=1)
+
+    for ind in indicateurs_a_tracer:
+        if ind not in pivot.columns:
+            pivot[ind] = np.nan
+
+    fig = generer_graphiques(pivot, f"Analyse de {nom_dep}", indicateurs_a_tracer, par_habitant and not afficher_les_deux, afficher_les_deux)
+
+    colonnes = ["Exercice", "Nom 2024 Département"] + indicateurs_a_tracer
+    df_final = pivot[[c for c in colonnes if c in pivot.columns]].round(1).sort_values(by=["Exercice"])
+    return fig, df_final
+
 
 # La première
 def departements_meme_strate(df, code_dep, mm_region=False):
@@ -419,6 +473,7 @@ st.sidebar.markdown(
 menu = st.sidebar.radio(
     label="Menu caché",
     options=[
+        "Analyser un seul département",
         "Recherche départements de même strate", 
         "Comparaison d'indicateurs financiers entre plusieurs départements", 
         "Comparaison d'indicateurs financiers entre un département et la moyenne de sa strate",
@@ -437,7 +492,23 @@ if menu != "Recherche départements de même strate" and len(indicateurs_choisis
 
 # --- CORPS DE LA PAGE SELON LE MENU ---
 
-if menu == "Recherche départements de même strate":
+if menu == "Analyser un seul département":
+    st.header("🎯 Analyse d'un seul département")
+    dep = st.selectbox("Sélectionnez le département à analyser :", liste_deps)
+        
+    annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
+                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+        
+    if st.button("Lancer l'analyse"):
+        fig, data = analyser_un_departement(df, dep, annees_sel, indicateurs_choisis, par_habitant, afficher_les_deux)
+        if fig:
+            st.pyplot(fig)
+            st.subheader("📋 Données brutes")
+            st.dataframe(data, use_container_width=True)
+        else:
+            st.warning("Aucune donnée trouvée pour ce département sur cet intervalle.")
+
+elif menu == "Recherche départements de même strate":
     st.header("🔍 Départements de même strate")
     col1, col2 = st.columns(2)
     with col1:
