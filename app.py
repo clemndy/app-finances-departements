@@ -189,28 +189,62 @@ def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_ha
         if ind not in pivot.columns:
             pivot[ind] = np.nan
 
-    # --- CRÉATION DU GRAPHIQUE UNIQUE SUPERPOSÉ ---
-    fig, ax = plt.subplots(figsize=(14, 8))
-    fig.suptitle(f"Comparaison d'indicateurs pour : {nom_dep}", fontsize=22, fontweight="bold", y=0.98)
-    
-    # On boucle pour dessiner chaque indicateur sur le même ax
-    for ind in indicateurs_a_tracer:
-        if ind in pivot.columns and pivot[ind].notna().any():
-            sns.lineplot(data=pivot, x="Exercice", y=ind, marker="o", label=ind, ax=ax, linewidth=3)
-            
-            # Si jamais on trace le désendettement, on garde les lignes repères
-            if ind == "Capacité de désendettement (années)":
-                ax.axhline(12, color="darkred", linestyle="--", linewidth=1)
-                ax.axhline(9, color="red", linestyle="--", linewidth=1)
-                ax.axhline(6, color="darkorange", linestyle="--", linewidth=1)
-                ax.axhline(3, color="green", linestyle="--", linewidth=1)
+    # --- CRÉATION DU GRAPHIQUE UNIQUE SUPERPOSÉ (MISE À JOUR) ---
+    a_des_normalises = any("(€/hab)" in ind for ind in indicateurs_a_tracer)
 
-    ax.set_ylabel("Valeur")
-    ax.set_xticks(pivot["Exercice"].unique())
-    
-    # On place la légende à l'extérieur pour ne pas cacher les courbes
-    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=12)
-    plt.tight_layout()
+    if afficher_les_deux and a_des_normalises:
+        # On coupe en deux (haut pour absolu, bas pour habitant) en partageant l'axe X
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12), sharex=True)
+        fig.suptitle(f"Analyse croisée de : {nom_dep}", fontsize=22, fontweight="bold", y=0.98)
+        
+        for ind in indicateurs_a_tracer:
+            if ind in pivot.columns and pivot[ind].notna().any():
+                if "(€/hab)" in ind:
+                    sns.lineplot(data=pivot, x="Exercice", y=ind, marker="o", label=ind, ax=ax2, linewidth=3)
+                else:
+                    sns.lineplot(data=pivot, x="Exercice", y=ind, marker="o", label=ind, ax=ax1, linewidth=3)
+                    
+                    # On garde les lignes de repères pour la dette sur l'axe des valeurs absolues
+                    if ind == "Capacité de désendettement (années)":
+                        ax1.axhline(12, color="darkred", linestyle="--", linewidth=1)
+                        ax1.axhline(9, color="red", linestyle="--", linewidth=1)
+                        ax1.axhline(6, color="darkorange", linestyle="--", linewidth=1)
+                        ax1.axhline(3, color="green", linestyle="--", linewidth=1)
+
+        ax1.set_ylabel("Valeurs absolues")
+        ax2.set_ylabel("Valeurs normalisées (€/hab)")
+        ax2.set_xlabel("Exercice")
+        
+        # On sort les légendes pour la propreté
+        ax1.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=12)
+        ax2.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=12)
+        
+        ax1.set_xticks(pivot["Exercice"].unique())
+        ax2.set_xticks(pivot["Exercice"].unique())
+        
+        plt.tight_layout()
+
+    else:
+        # Le code normal pour tracer sur un seul axe
+        fig, ax = plt.subplots(figsize=(14, 8))
+        fig.suptitle(f"Comparaison d'indicateurs pour : {nom_dep}", fontsize=22, fontweight="bold", y=0.98)
+        
+        for ind in indicateurs_a_tracer:
+            if ind in pivot.columns and pivot[ind].notna().any():
+                sns.lineplot(data=pivot, x="Exercice", y=ind, marker="o", label=ind, ax=ax, linewidth=3)
+                
+                if ind == "Capacité de désendettement (années)":
+                    ax.axhline(12, color="darkred", linestyle="--", linewidth=1)
+                    ax.axhline(9, color="red", linestyle="--", linewidth=1)
+                    ax.axhline(6, color="darkorange", linestyle="--", linewidth=1)
+                    ax.axhline(3, color="green", linestyle="--", linewidth=1)
+
+        ax.set_ylabel("Valeur")
+        ax.set_xlabel("Exercice")
+        ax.set_xticks(pivot["Exercice"].unique())
+        
+        ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=12)
+        plt.tight_layout()
 
     colonnes = ["Exercice", "Nom 2024 Département"] + indicateurs_a_tracer
     df_final = pivot[[c for c in colonnes if c in pivot.columns]].round(1).sort_values(by=["Exercice"])
