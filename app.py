@@ -26,7 +26,6 @@ indicateurs_fait_main = [
 ]
 
 # --- STRUCTURE HIÉRARCHIQUE DES CATÉGORIES ET SOUS-CATÉGORIES ---
-# On crée un dictionnaire qui contient des dictionnaires (pour les sous-catégories)
 structure_indicateurs = {
     "1️⃣ Épargne & Résultats": {
         "Indicateurs": [
@@ -39,7 +38,7 @@ structure_indicateurs = {
     },
     "2️⃣ Recettes": {
         "Recettes de fonctionnement": [
-            "Recettes de fonctionnement", # Le premier correspond au titre en gras
+            "Recettes de fonctionnement",
             "Attribution fonds de péreq. DMTO", "Autres dotations de fonctionnement",
             "Autres dotations et subventions", "Autres impôts et taxes", "CVAE", "Concours de l'Etat",
             "DMTO après péreq.", "DMTO avant péreq.", "Dotation globale de fonctionnement", "FMDI",
@@ -49,10 +48,12 @@ structure_indicateurs = {
         ],
         "Recettes d'investissement": [
             "Recettes d'investissement",
+            "Recettes d'investissement hors emprunts",  # <-- Ajouté ici
             "FCTVA", "Subventions reçues et participations", "DDEC", "Emprunts hors GAD", "Autres recettes d'investissement"
         ],
         "Totaux": [
-            "Recettes totales"
+            "Recettes totales",
+            "Recettes totales hors emprunt"  # <-- Ajouté ici
         ]
     },
     "3️⃣ Dépenses": {
@@ -86,21 +87,18 @@ structure_indicateurs = {
     }
 }
 
-# Gestion des indicateurs restants (sécurité au cas où la base de données change)
+# Gestion des indicateurs restants (sécurité base de données)
 liste_agregats = list(df["Agrégat"].unique())
 tous_indicateurs_dispo = set(indicateurs_fait_main + liste_agregats)
 
-# On vérifie quels indicateurs ont déjà été classés
 indicateurs_classes = set()
 for main_cat, subcats in structure_indicateurs.items():
     for subcat, inds in subcats.items():
         indicateurs_classes.update(inds)
 
-# Ceux qui n'ont pas été classés vont dans "Autres"
 indicateurs_restants = [ind for ind in tous_indicateurs_dispo if ind not in indicateurs_classes]
 if indicateurs_restants:
     structure_indicateurs["6️⃣ Autres"] = {"Indicateurs": sorted(indicateurs_restants)}
-
 
 # On stocke les variables min_annee et max_annee
 min_annee = int(df["Exercice"].min())
@@ -433,7 +431,7 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
 
     indicateurs_a_tracer = indicateurs.copy()
     
-    if par_habitant and "Population totale" in pivot.columns:
+    if par_habitant hardware and "Population totale" in pivot.columns:
         if afficher_les_deux:
             indicateurs_a_tracer = []
             for ind in indicateurs:
@@ -505,28 +503,24 @@ indicateurs_choisis = []
 
 # Création des menus déroulants (expanders) pour chaque grande catégorie
 for main_cat, subcats in sorted(structure_indicateurs.items()):
-    with st.sidebar.expander(main_cat, expanded=False): # Fermé par défaut pour gagner de la place
+    with st.sidebar.expander(main_cat, expanded=False):
         for subcat_name, indicators_list in subcats.items():
             
-            # Si c'est une vraie sous-catégorie (ex: "Dépenses de fonctionnement"), on affiche son titre en gras
             if subcat_name != "Indicateurs":
                 st.markdown(f"**{subcat_name}**")
             
-            # On cherche quels indicateurs de cette liste doivent être cochés par défaut
             defauts_cat = [ind for ind in indicators_list if ind in indicateurs_fait_main]
             
-            # Affichage de la boîte de choix multiple
             choix = st.multiselect(
                 label=subcat_name,
                 options=indicators_list,
                 default=defauts_cat,
-                key=f"ms_{main_cat}_{subcat_name}", # Clé unique obligatoire pour Streamlit
+                key=f"ms_{main_cat}_{subcat_name}",
                 label_visibility="collapsed" if subcat_name != "Indicateurs" else "visible" 
             )
             indicateurs_choisis.extend(choix)
 
-# Sécurité : Si un indicateur est présent dans plusieurs sous-catégories et sélectionné plusieurs fois,
-# cette ligne supprime les doublons pour ne pas faire planter les graphiques.
+# Nettoyage des doublons
 indicateurs_choisis = list(dict.fromkeys(indicateurs_choisis))
 
 st.sidebar.markdown("<br>", unsafe_allow_html=True)
@@ -558,7 +552,7 @@ menu = st.sidebar.radio(
 st.write("---")
 
 if menu != "Recherche départements de même strate" and len(indicateurs_choisis) == 0:
-    st.warning("⚠️ Veuillez sélectionner **au moins 1 indicateur** dans le panneau latéral de gauche pour générer les graphiques.")
+    st.warning("⚠️ Veuillez sélectionner **au moins 1 indicator** dans le panneau latéral de gauche pour générer les graphiques.")
     st.stop()
 
 
