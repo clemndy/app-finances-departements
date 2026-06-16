@@ -120,11 +120,9 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
 
     for i, indic in enumerate(indicateurs):
         ax = axes_liste[i]
-        
-        if indic not in df_plot.columns:
-            ax.set_title(f"{indic}\n(Données indisponibles)", fontsize=12, color="gray")
-            continue
-            
+
+        # Mesure de sécurité à priori inutile, sauf si un jour le fichier ofgl mis à jour n'a plus les mêmes noms d'agrégats
+     
         sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", marker="o", ax=ax, linewidth=3)
         
         titre_axe = f"{indic} (€/hab)" if par_habitant and not afficher_les_deux and indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)"] else indic
