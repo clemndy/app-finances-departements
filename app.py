@@ -111,7 +111,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         lignes = (n+1) // 2    # On aura un graphe "seul" en + en bas
 
     fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes))    # Affichage des graphiques en 4:3 avec un coeff de taille en +
-    fig.suptitle(titre, fontsize=30, fontweight="bold") 
+    fig.suptitle(titre, fontsize=30, fontweight="bold", y=0.99) 
 
     if lignes == 1 and colonnes == 1:
         axes_flat = [axes]
