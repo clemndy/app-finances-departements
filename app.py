@@ -111,7 +111,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         lignes = (n+1) // 2    # On aura un graphe "seul" en + en bas
 
     fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes))    # Affichage des graphiques en 4:3 avec un coeff de taille en +
-    fig.suptitle(titre, fontsize=24, fontweight=900, y=0.9925) 
+    fig.suptitle(titre, fontsize=24, fontweight=600, y=0.9925) 
 
     if lignes == 1 and colonnes == 1:
         axes_liste = [axes]
@@ -135,7 +135,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         else:
             titre_axe = indic
                 
-        axe.set_title(titre_axe, fontsize=15, fontweight=500)
+        axe.set_title(titre_axe, fontsize=15, fontweight=900)
         axe.set_xticks(df_plot["Exercice"].unique())
         
         if indic == "Capacité de désendettement (années)":
