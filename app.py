@@ -4,7 +4,7 @@ import seaborn as sns
 import numpy as np
 import streamlit as st
 
-# Chargement données et on les garde en mémoire vive
+# Chargement données et on les garde en mémoire vive pour pas que le site rame trop
 @st.cache_data
 def load_data():
     return pd.read_csv("ofgl-base-departements.zip", sep=",", low_memory=False)
@@ -19,11 +19,9 @@ except FileNotFoundError:
 # Configuration page web
 st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
 
-# Indicateurs cochés par défaut à l'ouverture du site
-indicateurs_fait_main = [
-    "Capacité de désendettement (années)", 
-    "Poids des AIS (%)"
-]
+
+
+
 
 # --- STRUCTURE HIÉRARCHIQUE DES CATÉGORIES ET SOUS-CATÉGORIES ---
 structure_indicateurs = {
