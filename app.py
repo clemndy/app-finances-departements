@@ -28,7 +28,11 @@ indicateurs_fait_main = [
 ]
 
 # Catégories et sous-catégories d'indicateurs
-structure_indicateurs = {
+# Mémo : dico_indicateurs est un dictionnaire dont les CLES sont les THEMES de nos indicateurs,
+# les VALEURS sont des DICTIONNAIRES
+# dont les CLES sont les SOUS PARTIES et
+# les VALEURS sont nos INDICATEURS
+dico_indicateurs = {
     "1️⃣ Épargne & Résultats": {
         "Indicateurs": [
             "Dépenses totales", "Dépenses d'investissement", "Dépenses de fonctionnement",
@@ -95,13 +99,18 @@ min_annee = int(df["Exercice"].min())
 max_annee = int(df["Exercice"].max())
 
 
+
 # Fonction de génération des graphiques dynamique
 def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher_les_deux=False):
     n = len(indicateurs)
     cols = 2 if n >= 2 else 1
-    rows = (n + cols - 1) // cols
     
-    fig, axes = plt.subplots(rows, cols, figsize=(16, 5 * rows))
+    if n//2==0:
+        rows = n / cols
+    else:
+        rows = (n+1)/2    # On aura un graphe "seul" en bas
+
+    fig, axes = plt.subplots(rows, cols, figsize=(16, 9))
     fig.suptitle(titre, fontsize=25, fontweight="bold", y=1.02) 
 
     if rows == 1 and cols == 1:
@@ -492,7 +501,7 @@ st.sidebar.markdown("**📂 Choix des indicateurs par thème :**")
 indicateurs_choisis = []
 
 # Création des menus déroulants (expanders) pour chaque grande catégorie
-for main_cat, subcats in sorted(structure_indicateurs.items()):
+for main_cat, subcats in sorted(dico_indicateurs.items()):
     with st.sidebar.expander(main_cat, expanded=False):
         for subcat_name, indicators_list in subcats.items():
             
