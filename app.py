@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import streamlit as st
-import io
 
 # Chargement données et on les garde en mémoire vive pour pas que le site rame trop
 @st.cache_data
@@ -29,7 +28,7 @@ indicateurs_fait_main = [
 ]
 
 # Catégories et sous-catégories d'indicateurs
-# Mémo : dico_indicateurs is un dictionnaire dont les CLES sont les THEMES de nos indicateurs,
+# Mémo : dico_indicateurs est un dictionnaire dont les CLES sont les THEMES de nos indicateurs,
 # les VALEURS sont des DICTIONNAIRES
 # dont les CLES sont les SOUS PARTIES et
 # les VALEURS sont nos INDICATEURS
@@ -304,7 +303,7 @@ def comparer_departements(df, liste_codes_dep, intervalle_annees, indicateurs, p
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
                    (df_temp["Code Insee 2024 Département"].isin(liste_codes_dep)) & \
                    (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
-                    
+                   
     idx_cols = ["Exercice", "Nom 2024 Département"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
 
@@ -577,17 +576,6 @@ if menu == "Analyser un seul département":
         fig, data = analyser_un_departement(df, dep, annees_sel, indicateurs_choisis, par_habitant, afficher_les_deux)
         if fig:
             st.pyplot(fig)
-            
-            # --- BLOC TÉLÉCHARGEMENT PDF ---
-            buf = io.BytesIO()
-            fig.savefig(buf, format="pdf", bbox_inches="tight")
-            st.download_button(
-                label="📥 Télécharger ce graphique en PDF",
-                data=buf.getvalue(),
-                file_name=f"Analyse_{dep}.pdf",
-                mime="application/pdf"
-            )
-            
             st.subheader("📋 Données brutes")
             st.dataframe(data, use_container_width=True)
         else:
@@ -627,17 +615,6 @@ elif menu == "Comparaison d'indicateurs financiers entre plusieurs départements
         else:
             fig, data = comparer_departements(df, deps_selectionnes, annees_sel, indicateurs_choisis, par_habitant, afficher_les_deux)
             st.pyplot(fig)
-            
-            # --- BLOC TÉLÉCHARGEMENT PDF ---
-            buf = io.BytesIO()
-            fig.savefig(buf, format="pdf", bbox_inches="tight")
-            st.download_button(
-                label="📥 Télécharger ce graphique en PDF",
-                data=buf.getvalue(),
-                file_name="Comparaison_Financiere.pdf",
-                mime="application/pdf"
-            )
-            
             st.subheader("📋 Données brutes")
             st.dataframe(data, use_container_width=True)
 
@@ -657,17 +634,6 @@ elif menu == "Département comparé à la moyenne de sa strate":
     if st.button("Générer l'analyse"):
         fig, data = comparer_departement_strate(df, dep, annees_sel, indicateurs_choisis, meme_region, par_habitant, afficher_les_deux)
         st.pyplot(fig)
-        
-        # --- BLOC TÉLÉCHARGEMENT PDF ---
-        buf = io.BytesIO()
-        fig.savefig(buf, format="pdf", bbox_inches="tight")
-        st.download_button(
-            label="📥 Télécharger ce graphique en PDF",
-            data=buf.getvalue(),
-            file_name=f"Analyse_Strate_{dep}.pdf",
-            mime="application/pdf"
-        )
-        
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
 
@@ -687,16 +653,5 @@ elif menu == "Département comparé à la moyenne de sa strate et à la moyenne 
     if st.button("Générer l'analyse complète"):
         fig, data = comparer_departement_strate_metro(df, dep, annees_sel, indicateurs_choisis, meme_region, par_habitant, afficher_les_deux)
         st.pyplot(fig)
-        
-        # --- BLOC TÉLÉCHARGEMENT PDF ---
-        buf = io.BytesIO()
-        fig.savefig(buf, format="pdf", bbox_inches="tight")
-        st.download_button(
-            label="📥 Télécharger ce graphique en PDF",
-            data=buf.getvalue(),
-            file_name=f"Analyse_Complete_{dep}.pdf",
-            mime="application/pdf"
-        )
-        
         st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
