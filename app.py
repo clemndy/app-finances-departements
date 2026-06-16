@@ -135,7 +135,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         else:
             titre_axe = indic
                 
-        axe.set_title(titre_axe, fontsize=15, fontweight="bold", alpha=0.7)
+        axe.set_title(titre_axe, fontsize=15, fontweight="bold", alpha=0.8)
         axe.set_xticks(df_plot["Exercice"].unique())
         
         if indic == "Capacité de désendettement (années)":
