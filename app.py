@@ -89,7 +89,9 @@ dico_indicateurs = {
             "Encours de dette - Dettes bancaires et assimilées", "Encours de dette - Dépôts et cautionnements reçus",
             "Capacité de désendettement (années)", "Crédits de trésorerie", "Dépôts au Trésor"
         ]
-    }
+    },
+    "caca boudin" : { "indicatos : ["zizi", "cucu"] }
+    
 }
 
 # On stocke les variables min_annee et max_annee
