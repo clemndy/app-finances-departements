@@ -180,9 +180,7 @@ def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_ha
     code_dep = str(code_dep)
     annee_min_temp, annee_max_temp = intervalle_annees
     
-    serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
-                   (df_temp["Code Insee 2024 Département"] == code_dep) & \
-                   (df_temp["Exercice"] >= annee_min_temp) & (df_temp["Exercice"] <= annee_max_temp)
+    serie_filtre = (df_temp["Type de budget"] == "Budget principal") & (df_temp["Code Insee 2024 Département"] == code_dep) & (annee_min_temp <= df_temp["Exercice"] <= annee_max_temp)
                    
     idx_cols = ["Exercice", "Nom 2024 Département"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
