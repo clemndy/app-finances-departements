@@ -97,9 +97,9 @@ dico_indicateurs = {
     }    
 }
 
-# On stocke les variables min_annee et max_annee
-min_annee = int(df["Exercice"].min())
-max_annee = int(df["Exercice"].max())
+# On stocke les variables annee_min et annee_max
+annee_min = int(df["Exercice"].min())
+annee_max = int(df["Exercice"].max())
 
 
 
@@ -172,17 +172,17 @@ def ajouter_etiquettes_desendettement(axe, df_donnees):
             )
 
 
-# --- FONCTIONS DE TRAITEMENT ET ANALYSE ---
 
+# LES FONCTIONS "COEUR" DU CODE
 def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
     df_temp = df.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
-    annee_min, annee_max = intervalle_annees
+    annee_min_temp, annee_max_temp = intervalle_annees
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
                    (df_temp["Code Insee 2024 Département"] == code_dep) & \
-                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   (df_temp["Exercice"] >= annee_min_temp) & (df_temp["Exercice"] <= annee_max_temp)
                    
     idx_cols = ["Exercice", "Nom 2024 Département"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
@@ -298,11 +298,11 @@ def departements_meme_strate(df, code_dep, mm_region=False):
 def comparer_departements(df, liste_codes_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
     df_temp = df.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
-    annee_min, annee_max = intervalle_annees
+    annee_min_temp, annee_max_temp = intervalle_annees
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
                    (df_temp["Code Insee 2024 Département"].isin(liste_codes_dep)) & \
-                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   (df_temp["Exercice"] >= annee_min_temp) & (df_temp["Exercice"] <= annee_max_temp)
                    
     idx_cols = ["Exercice", "Nom 2024 Département"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
@@ -347,7 +347,7 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
     df_temp = df.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
-    annee_min, annee_max = intervalle_annees
+    annee_min_temp, annee_max_temp = intervalle_annees
     
     df_dep_cible = df_temp[df_temp["Code Insee 2024 Département"] == code_dep]
     strate = df_dep_cible["Strate population 2024"].iloc[0]
@@ -356,7 +356,7 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
                    (df_temp["Strate population 2024"] == strate) & \
-                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   (df_temp["Exercice"] >= annee_min_temp) & (df_temp["Exercice"] <= annee_max_temp)
                    
     idx_cols = ["Exercice", "Code Insee 2024 Département", "Nom 2024 Département", "Nom 2024 Région"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
@@ -419,7 +419,7 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
     df_temp = df.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
-    annee_min, annee_max = intervalle_annees
+    annee_min_temp, annee_max_temp = intervalle_annees
     
     df_dep_cible = df_temp[df_temp["Code Insee 2024 Département"] == code_dep]
     strate = df_dep_cible["Strate population 2024"].iloc[0]
@@ -428,7 +428,7 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
                    ((df_temp["Outre-mer"] == "Non") | (df_temp["Code Insee 2024 Département"] == code_dep)) & \
-                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   (df_temp["Exercice"] >= annee_min_temp) & (df_temp["Exercice"] <= annee_max_temp)
                    
     idx_cols = ["Exercice", "Code Insee 2024 Département", "Nom 2024 Département", "Strate population 2024", "Outre-mer", "Nom 2024 Région"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
@@ -582,7 +582,7 @@ if menu == "Analyser un seul département":
     dep = st.selectbox("Sélectionnez le département à analyser :", liste_deps)
         
     annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
-                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+                           min_value=annee_min, max_value=annee_max, value=(annee_min, annee_max))
         
     if st.button("Lancer l'analyse"):
         fig, data = analyser_un_departement(df, dep, annees_sel, indicateurs_choisis, par_habitant, afficher_les_deux)
@@ -629,7 +629,7 @@ elif menu == "Comparaison d'indicateurs financiers entre plusieurs départements
     )
         
     annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
-                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+                           min_value=annee_min, max_value=annee_max, value=(annee_min, annee_max))
         
     if st.button("Lancer la comparaison"):
         if len(deps_selectionnes) == 0:
@@ -663,7 +663,7 @@ elif menu == "Département comparé à la moyenne de sa strate":
         afficher_region = st.checkbox("Afficher la moyenne de la strate (Même région)", value=False)
         
     annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
-                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+                           min_value=annee_min, max_value=annee_max, value=(annee_min, annee_max))
         
     if st.button("Générer l'analyse"):
         if not afficher_france and not afficher_region:
@@ -696,7 +696,7 @@ elif menu == "Département comparé à la moyenne de sa strate et à la moyenne 
         meme_region = st.checkbox("Restreindre la moyenne de la strate à la même région")
         
     annees_sel = st.slider("Sélectionnez l'intervalle des années (Exercices) :", 
-                           min_value=min_annee, max_value=max_annee, value=(min_annee, max_annee))
+                           min_value=annee_min, max_value=annee_max, value=(annee_min, annee_max))
         
     if st.button("Générer l'analyse complète"):
         fig, data = comparer_departement_strate_metro(df, dep, annees_sel, indicateurs_choisis, meme_region, par_habitant, afficher_les_deux)
