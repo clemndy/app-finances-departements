@@ -174,8 +174,8 @@ def ajouter_etiquettes_desendettement(axe, df_donnees):
 
 
 # LES FONCTIONS "COEUR" DU CODE
-def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
-    df_temp = df.copy()
+def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
+    df_temp = df_arg.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
     annee_min_temp, annee_max_temp = intervalle_annees
@@ -273,8 +273,8 @@ def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_ha
     return fig, df_final
 
 
-def departements_meme_strate(df, code_dep, mm_region=False):
-    df_temp = df.copy()
+def departements_meme_strate(df_arg, code_dep, mm_region=False):
+    df_temp = df_arg.copy()
     code_dep = str(code_dep)
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     df_dep_cible = df_temp[df_temp["Code Insee 2024 Département"] == code_dep]
@@ -293,8 +293,8 @@ def departements_meme_strate(df, code_dep, mm_region=False):
     return df_resultat.reset_index(drop=True)
 
 
-def comparer_departements(df, liste_codes_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
-    df_temp = df.copy()
+def comparer_departements(df_arg, liste_codes_dep, intervalle_annees, indicateurs, par_habitant=False, afficher_les_deux=False):
+    df_temp = df_arg.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     annee_min_temp, annee_max_temp = intervalle_annees
     
@@ -341,8 +341,8 @@ def comparer_departements(df, liste_codes_dep, intervalle_annees, indicateurs, p
     return fig, df_final
 
 
-def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, afficher_france=True, afficher_region=False, par_habitant=False, afficher_les_deux=False):
-    df_temp = df.copy()
+def comparer_departement_strate(df_arg, code_dep, intervalle_annees, indicateurs, afficher_france=True, afficher_region=False, par_habitant=False, afficher_les_deux=False):
+    df_temp = df_arg.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
     annee_min_temp, annee_max_temp = intervalle_annees
@@ -413,8 +413,8 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
     return fig, df_final
 
 
-def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateurs, meme_region=False, par_habitant=False, afficher_les_deux=False):
-    df_temp = df.copy()
+def comparer_departement_strate_metro(df_arg, code_dep, intervalle_annees, indicateurs, meme_region=False, par_habitant=False, afficher_les_deux=False):
+    df_temp = df_arg.copy()
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
     code_dep = str(code_dep)
     annee_min_temp, annee_max_temp = intervalle_annees
