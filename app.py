@@ -18,8 +18,10 @@ except FileNotFoundError:
     st.stop()
 
 
+
 # Configuration page web
 st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
+
 
 
 # Indicateurs cochés par défaut à l'ouverture du site
@@ -100,6 +102,7 @@ min_annee = int(df["Exercice"].min())
 max_annee = int(df["Exercice"].max())
 
 
+
 # Fonction de génération des graphiques
 def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher_les_deux=False):
     n = len(indicateurs)
@@ -144,11 +147,12 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
             if axe.get_legend() is not None:
                 axe.legend(loc="best", fontsize="small")
 
-    if len(axes_liste) - n > 0:    # Si on est dans le cas ou le nombre d'indicateurs est impair, on supprime le dernier axe
+    if len(axes_liste) - n > 0:    # Si on est dans le cas ou le nombre d'indicateurs est pair, on supprime le dernier axe
         fig.delaxes(axes_liste[-1])
 
     plt.tight_layout()
     return fig
+
 
 
 def ajouter_etiquettes_desendettement(axe, df_donnees):
@@ -253,11 +257,11 @@ def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_ha
         for indic in indicateurs_a_tracer:
             if indic in pivot.columns and pivot[indic].notna().any():
                 sns.lineplot(data=pivot, x="Exercice", y=indic, marker="o", label=indic, ax=axe, linewidth=3)
-                
+                    
                 if indic == "Capacité de désendettement (années)":
                     axe.axhline(12, color="darkred", linestyle="--", linewidth=1)
                     axe.axhline(9, color="red", linestyle="--", linewidth=1)
-                    axe.axhline(6, color="darkorange", linestyle="--", linewidth=1)
+                   axe.axhline(6, color="darkorange", linestyle="--", linewidth=1)
                     axe.axhline(3, color="green", linestyle="--", linewidth=1)
 
         axe.set_ylabel("Valeur")
@@ -271,7 +275,7 @@ def analyser_un_departement(df, code_dep, intervalle_annees, indicateurs, par_ha
     return fig, df_final
 
 
-def sample_meme_strate(df, code_dep, mm_region=False):
+def departements_meme_strate(df, code_dep, mm_region=False):
     df_temp = df.copy()
     code_dep = str(code_dep)
     df_temp["Code Insee 2024 Département"] = df_temp["Code Insee 2024 Département"].astype(str)
@@ -351,9 +355,9 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
     region = df_dep_cible["Nom 2024 Région"].iloc[0]
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
-                    (df_temp["Strate population 2024"] == strate) & \
-                    (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
-                    
+                   (df_temp["Strate population 2024"] == strate) & \
+                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   
     idx_cols = ["Exercice", "Code Insee 2024 Département", "Nom 2024 Département", "Nom 2024 Région"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
 
@@ -391,12 +395,10 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
     cols_mean = [c for c in indicateurs_a_tracer + ["Capacité de désendettement (vraie)"] if c in df_autres.columns]
     
     list_df_to_concat = [df_cible]
-    
     if afficher_france and not df_autres.empty:
         df_moyenne_france = df_autres.groupby("Exercice")[cols_mean].mean().reset_index()
         df_moyenne_france["Nom 2024 Département"] = f"Moyenne Strate {strate} (France)"
         list_df_to_concat.append(df_moyenne_france)
-        
     if afficher_region and not df_autres.empty:
         df_autres_region = df_autres[df_autres["Nom 2024 Région"] == region]
         if not df_autres_region.empty:
@@ -406,7 +408,7 @@ def comparer_departement_strate(df, code_dep, intervalle_annees, indicateurs, af
             
     df_plot = pd.concat(list_df_to_concat, ignore_index=True)
 
-    fig = generer_graphiques(df_plot, f"{nom_dep} comparé aux moyennes de sa strate", indicateurs_a_tracer, par_habitant and not afficher_les_deux, afficher_les_deux)
+    fig = generer_graphiques(df_plot, f"{nom_dep} comparé à la moyenne de sa strate", indicateurs_a_tracer, par_habitant and not afficher_les_deux, afficher_les_deux)
 
     colonnes = ["Exercice", "Nom 2024 Département"] + indicateurs_a_tracer
     df_final = df_plot[[c for c in colonnes if c in df_plot.columns]].round(1).sort_values(by=["Exercice", "Nom 2024 Département"])
@@ -425,9 +427,9 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
     region = df_dep_cible["Nom 2024 Région"].iloc[0]
     
     serie_filtre = (df_temp["Type de budget"] == "Budget principal") & \
-                    ((df_temp["Outre-mer"] == "Non") | (df_temp["Code Insee 2024 Département"] == code_dep)) & \
-                    (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
-                    
+                   ((df_temp["Outre-mer"] == "Non") | (df_temp["Code Insee 2024 Département"] == code_dep)) & \
+                   (df_temp["Exercice"] >= annee_min) & (df_temp["Exercice"] <= annee_max)
+                   
     idx_cols = ["Exercice", "Code Insee 2024 Département", "Nom 2024 Département", "Strate population 2024", "Outre-mer", "Nom 2024 Région"]
     if "Population totale" in df_temp.columns: idx_cols.append("Population totale")
 
@@ -441,7 +443,7 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
 
     indicateurs_a_tracer = indicateurs.copy()
     
-    if par_habitant and "Population totale" in pivot.columns:
+    if par_habitant conversational_history and "Population totale" in pivot.columns:
         if afficher_les_deux:
             indicateurs_a_tracer = []
             for indic in indicateurs:
@@ -561,20 +563,15 @@ menu = st.sidebar.radio(
 
 st.write("---")
 
-# Vérifications de sécurité et de limites
 if menu != "Recherche départements de même strate" and len(indicateurs_choisis) == 0:
     st.warning("⚠️ Veuillez sélectionner **au moins 1 indicateur** dans le panneau latéral de gauche pour générer les graphiques.")
     st.stop()
 
 if menu != "Recherche départements de même strate":
-    # Calcul du nombre total de graphiques générés
-    facteur_vue = 2 if (par_habitant and afficher_les_deux) else 1
-    nb_graphiques = len(indicateurs_choisis) * facteur_vue
-    
-    if nb_graphiques > 10:
-        st.error(f"❌ **Limite de graphiques dépassée ({nb_graphiques}/10 max) :** "
-                 f"Votre configuration actuelle demande la génération de {nb_graphiques} graphiques. "
-                 f"Veuillez réduire le nombre d'indicateurs cochés ou désactiver l'affichage côte à côte dans le panneau latéral.")
+    facteur_graphes = 2 if (par_habitant and afficher_les_deux) else 1
+    total_graphes = len(indicateurs_choisis) * facteur_graphes
+    if total_graphes > 10:
+        st.error(f"❌ **Limite de graphiques dépassée ({total_graphes}/10 max) :** Votre configuration actuelle demande {total_graphes} graphiques. Veuillez réduire le nombre d'indicateurs cochés ou décocher l'affichage côte à côte.")
         st.stop()
 
 
@@ -615,7 +612,7 @@ elif menu == "Recherche départements de même strate":
         meme_region = st.checkbox("Restreindre à la même région uniquement")
     
     if st.button("Chercher les correspondances"):
-        resultat = sample_meme_strate(df, dep, meme_region)
+        resultat = departements_meme_strate(df, dep, meme_region)
         if not resultat.empty:
             st.success(f"Voici les départements trouvés ({len(resultat)}) :")
             st.dataframe(resultat, use_container_width=True)
@@ -673,7 +670,7 @@ elif menu == "Département comparé à la moyenne de sa strate":
             st.error("⚠️ Veuillez cocher au moins une moyenne à afficher (France et/ou Même région).")
         else:
             fig, data = comparer_departement_strate(df, dep, annees_sel, indicateurs_choisis, afficher_france, afficher_region, par_habitant, afficher_les_deux)
-            
+                
             # --- AJOUT BOUTON PDF ICI ---
             buf = io.BytesIO()
             fig.savefig(buf, format="pdf", bbox_inches="tight")
@@ -703,7 +700,7 @@ elif menu == "Département comparé à la moyenne de sa strate et à la moyenne 
         
     if st.button("Générer l'analyse complète"):
         fig, data = comparer_departement_strate_metro(df, dep, annees_sel, indicateurs_choisis, meme_region, par_habitant, afficher_les_deux)
-        
+                
         # --- AJOUT BOUTON PDF ICI ---
         buf = io.BytesIO()
         fig.savefig(buf, format="pdf", bbox_inches="tight")
@@ -715,5 +712,5 @@ elif menu == "Département comparé à la moyenne de sa strate et à la moyenne 
         )
         # ----------------------------
         st.pyplot(fig)
-        st.subheader("📋 Données brutes")
+       st.subheader("📋 Données brutes")
         st.dataframe(data, use_container_width=True)
