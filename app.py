@@ -443,7 +443,7 @@ def comparer_departement_strate_metro(df, code_dep, intervalle_annees, indicateu
 
     indicateurs_a_tracer = indicateurs.copy()
     
-    if par_habitant conversational_history and "Population totale" in pivot.columns:
+    if par_habitant and "Population totale" in pivot.columns:
         if afficher_les_deux:
             indicateurs_a_tracer = []
             for indic in indicateurs:
