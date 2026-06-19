@@ -90,7 +90,7 @@ dico_indicateurs = {
             "Crédits de trésorerie", "Dépôts au Trésor"
         ]
     },
-    "Autres": {
+    "6️⃣​ Autres": {
         "Indicateurs calculés via les données ofgl": [
              "Capacité de désendettement (années)", "Poids des AIS (%)"
         ]
