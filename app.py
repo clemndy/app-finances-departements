@@ -280,8 +280,12 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
             else:
                 axe.plot([], [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
         
-        axe.set_title("Valeurs brutes", fontsize=20, fontweight="bold", alpha=0.85)        
-        axe.set_ylabel("Valeur")
+        if par_habitant:
+            axe.set_title("Valeurs normalisées (€/hab)", fontsize=20, fontweight="bold", alpha=0.85)
+            axe.set_ylabel("Valeurs (€/hab)")
+        else:
+            axe.set_title("Valeurs brutes", fontsize=20, fontweight="bold", alpha=0.85)
+            axe.set_ylabel("Valeurs")
         axe.set_xlabel("Exercice")
         axe.set_xticks(pivot["Exercice"].unique())
         axe.legend(loc='best', fontsize="small")
