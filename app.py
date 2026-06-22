@@ -230,25 +230,28 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
                 if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
                     pivot[indic_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
                                                                                                                                                     # un != (car NaN != 0 renvoit True et derrière ça marcherait)
-    a_des_normalises = any("(€/hab)" in indic_temp for indic_temp in indicateurs_a_tracer)                                                          # au lieu de > mais ce ne serait pas "propre"
-
-    if afficher_les_deux and a_des_normalises:
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 7))
-        fig.suptitle(f"Analyse croisée de : {nom_dep}", fontsize=22, fontweight="bold", y=1.02)
+    if afficher_les_deux:                                                                                                                           # au lieu de > mais ce ne serait pas "propre"
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+        fig.suptitle(f"Analyse croisée du département : {nom_dep}", fontsize=24, fontweight="bold", y=0.9925)
         
         for indic_temp in indicateurs_a_tracer:
-            if indic_temp in pivot.columns and pivot[indic_temp].notna().any():
-                if "(€/hab)" in indic_temp:
-                    sns.lineplot(data=pivot, x="Exercice", y=indic_temp, marker="o", label=indic_temp, ax=ax2, linewidth=3)
-                else:
+            if not pivot[indic_temp].notna().any():    # Si on a au moins une donnée à afficher
+                if "(€/hab)" not in indic_temp:
                     sns.lineplot(data=pivot, x="Exercice", y=indic_temp, marker="o", label=indic_temp, ax=ax1, linewidth=3)
+                else:
+                    sns.lineplot(data=pivot, x="Exercice", y=indic_temp, marker="o", label=indic_temp, ax=ax2, linewidth=3)
                     
                     if indic_temp == "Capacité de désendettement (années)":
                         ax1.axhline(12, color="darkred", linestyle="--", linewidth=1)
                         ax1.axhline(9, color="red", linestyle="--", linewidth=1)
                         ax1.axhline(6, color="darkorange", linestyle="--", linewidth=1)
                         ax1.axhline(3, color="green", linestyle="--", linewidth=1)
-
+            else:    # Si on a vraiment rien à afficher
+                if "(€/hab)" not in indic_temp:
+                    ax1.plot([], [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="---")
+                else:
+                    ax2.plot([], [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="---")
+                    
         ax1.set_title("Valeurs absolues", fontsize=15, fontweight="semibold")
         ax2.set_title("Valeurs normalisées (€/hab)", fontsize=15, fontweight="semibold")
         ax1.set_ylabel("Montant")
