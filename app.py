@@ -235,7 +235,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         fig.suptitle(f"Analyse croisée du département : {nom_dep}", fontsize=24, fontweight="bold", y=0.9925)
         
         for indic_temp in indicateurs_a_tracer:
-            if not pivot[indic_temp].notna().any():    # Si on a au moins une donnée à afficher
+            if pivot[indic_temp].notna().any():    # Si on a au moins une donnée à afficher
                 if "(€/hab)" not in indic_temp:
                     sns.lineplot(data=pivot, x="Exercice", y=indic_temp, marker="o", label=indic_temp, ax=ax1, linewidth=3)
                 else:
