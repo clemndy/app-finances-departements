@@ -265,7 +265,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         plt.tight_layout()
         
     else:
-        fig, axe = plt.subplots(figsize=(8, 6))
+        fig, axe = plt.subplots(figsize=(16, 6))
         fig.suptitle(f"Comparaison d'indicateurs du département : {nom_dep}", fontsize=24, fontweight="bold", y=0.9925)
         
         for indic_temp in indicateurs_a_tracer:
