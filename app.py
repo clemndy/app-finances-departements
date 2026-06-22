@@ -5,6 +5,9 @@ import numpy as np
 import streamlit as st
 import io
 
+# Configuration page web
+st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
+
 # Chargement données et on les garde en mémoire vive pour pas que le site rame trop
 @st.cache_data
 def load_data():
@@ -23,11 +26,6 @@ colonnes_manquantes = [col for col in colonnes_necessaires if col not in df.colu
 if colonnes_manquantes:
     st.error(f"🚨 **Données corrompues :** Le fichier source est incomplet. Il manque la ou les colonnes obligatoires suivantes : {', '.join(colonnes_manquantes)}")
     st.stop()
-
-
-
-# Configuration page web
-st.set_page_config(page_title="Analyse financière départementale", layout="wide", page_icon="📊")
 
 
 
