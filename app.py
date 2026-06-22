@@ -252,10 +252,10 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
                 else:
                     ax2.plot([], [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
                     
-        ax1.set_title("Valeurs absolues", fontsize=15, fontweight="semibold")
+        ax1.set_title("Valeurs brutes", fontsize=15, fontweight="semibold")
         ax2.set_title("Valeurs normalisées (€/hab)", fontsize=15, fontweight="semibold")
-        ax1.set_ylabel("Montant")
-        ax2.set_ylabel("Montant (€/hab)")
+        ax1.set_ylabel("Valeurs")
+        ax2.set_ylabel("Valeurs (€/hab)")
         ax1.set_xlabel("Exercice")
         ax2.set_xlabel("Exercice")
         ax1.legend(loc='best', fontsize=10)
@@ -265,7 +265,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         plt.tight_layout()
         
     else:
-        fig, axe = plt.subplots(figsize=(6, 8))
+        fig, axe = plt.subplots(figsize=(8, 6))
         fig.suptitle(f"Comparaison d'indicateurs du département : {nom_dep}", fontsize=24, fontweight="bold", y=0.9925)
         
         for indic_temp in indicateurs_a_tracer:
