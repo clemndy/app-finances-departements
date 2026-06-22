@@ -157,7 +157,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
 
     plt.tight_layout()
     return fig
-
+0
 # Fonction auxilière rajoutée en cours de route
 def ajouter_etiquettes_desendettement(axe, df_donnees):
     for index, ligne in df_donnees.iterrows():
@@ -193,9 +193,14 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
     index_colonnes = ["Exercice", "Nom 2024 Département", "Population totale"]
 
     pivot = df_temp[serie_filtre].pivot_table(index=index_colonnes, columns="Agrégat", values="Montant", aggfunc="sum").reset_index()    # aggfunc permet d'avoir la somme de toutes les lignes d'épargne nette par exemple
+    if pivot.empty: # Sécurité
+        fig, ax = plt.subplots()
+        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        return fig, pd.DataFrame()
     
     nom_dep = pivot["Nom 2024 Département"].iloc[0]    # On récupère le nom du département pour plus tard l'afficher et pas avoir que les numéros de départements
-
+    
+    
     if "Capacité de désendettement (années)" in indicateurs:
         pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda ligne:ligne.get("Encours de dette", 0) / ligne["Epargne brute"] if ligne.get("Epargne brute", 0) != 0 else np.nan, axis=1)    # axis=1 car on lit 
         pivot["Capacité de désendettement (années)"] = pivot.apply(lambda ligne: ligne.get("Encours de dette", 0) / ligne["Epargne brute"] if ligne.get("Epargne brute", 0) > 0 else 0, axis=1)        # ligne par ligne
