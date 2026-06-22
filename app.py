@@ -269,9 +269,9 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         fig.suptitle(f"Comparaison d'indicateurs du département : {nom_dep}", fontsize=24, fontweight="bold", y=0.9925)
         
         for indic_temp in indicateurs_a_tracer:
-            if indic_temp in pivot.columns and pivot[indic_temp].notna().any():
+            if pivot[indic_temp].notna().any():
                 sns.lineplot(data=pivot, x="Exercice", y=indic_temp, marker="o", label=indic_temp, ax=axe, linewidth=3)
-                    
+            
                 if indic_temp == "Capacité de désendettement (années)":
                     axe.axhline(12, color="darkred", linestyle="--", linewidth=1)
                     axe.axhline(9, color="red", linestyle="--", linewidth=1)
@@ -283,7 +283,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         axe.set_ylabel("Valeur")
         axe.set_xlabel("Exercice")
         axe.set_xticks(pivot["Exercice"].unique())
-        axe.legend(bbox_to_anchor=(1.02, 1), loc='best', fontsize="small")
+        axe.legend(loc='best', fontsize="small")
         plt.tight_layout()
 
     colonnes = ["Exercice", "Nom 2024 Département"] + indicateurs_a_tracer
