@@ -157,7 +157,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
 
     plt.tight_layout()
     return fig
-0
+
 # Fonction auxilière rajoutée en cours de route
 def ajouter_etiquettes_desendettement(axe, df_donnees):
     for index, ligne in df_donnees.iterrows():
@@ -251,10 +251,21 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
                     
             else:    # Si on a vraiment rien à afficher
                 if "(€/hab)" not in indic_temp:
-                    ax1.plot([],  x="Exercice", label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
+                    ax1.plot([],  [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
                 else:
-                    ax2.plot([],  x="Exercice", label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
-                    
+                    ax2.plot([],  [], label=f"⚠️ {indic_temp} indisponible", color="gray", linestyle="--")
+
+        # 🚨 DÉBUT DE LA MODIF MINIMALISTE 🚨
+        # Si on a sélectionné QUE des ratios ou des années, aucune colonne (€/hab) n'existe
+        if not any("(€/hab)" in indic for indic in indicateurs_a_tracer):
+            # 1. On trace une ligne invisible pour "sauver" l'axe des années en abscisse
+            ax2.plot(pivot["Exercice"], [0]*len(pivot), alpha=0) 
+            # 2. On écrit le message d'incohérence au milieu du graphe
+            ax2.text(pivot["Exercice"].median(), 0, "Données non normalisables", ha='center', va='center', fontsize=18, color="gray")
+            # 3. On efface les graduations de l'axe Y qui ne servent à rien
+            ax2.set_yticks([]) 
+        # 🚨 FIN DE LA MODIF 🚨
+        
         ax1.set_title("Valeurs brutes", fontsize=15, fontweight="bold", alpha=0.85)
         ax2.set_title("Valeurs normalisées (€/hab)", fontsize=15, fontweight="bold", alpha=0.85)
         ax1.set_ylabel("Valeurs")
