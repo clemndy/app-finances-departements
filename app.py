@@ -272,8 +272,8 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         ax2.set_xlabel("Exercice")
         ax1.legend(loc='best', fontsize="small")
         ax2.legend(loc='best', fontsize="small")
-        ax1.set_xlim(pivot["Exercice"].min() - 0.5, pivot["Exercice"].max() + 0.5)
-        ax2.set_xlim(pivot["Exercice"].min() - 0.5, pivot["Exercice"].max() + 0.5)
+        ax1.set_xlim(annee_min - 0.5, anne_max_ + 0.5)    # On force l'échelle sur l'axe des abscisses pour éviter que le code crash 
+        ax2.set_xlim(annee_min - 0.5, anne_max_ + 0.5)    # (quand il n'y a pas de données à tracer par exemple)
         ax1.set_xticks(pivot["Exercice"].unique())
         ax2.set_xticks(pivot["Exercice"].unique())
         plt.tight_layout()
