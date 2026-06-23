@@ -202,7 +202,10 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
     
     
     if "Capacité de désendettement (années)" in indicateurs:
-        pivot["Capacité de désendettement (vraie)"] = pivot.apply(lambda ligne:ligne.get("Encours de dette", 0) / ligne["Epargne brute"] if ligne.get("Epargne brute", 0) != 0 else (float('inf') if ligne.get("Encours de dette", 0) > 0 else np.nan, axis=1)   
+        pivot["Capacité de désendettement (vraie)"] = pivot.apply(
+            lambda ligne: ligne.get("Encours de dette", 0) / ligne["Epargne brute"] if ligne.get("Epargne brute", 0) != 0 else (float('inf') if ligne.get("Encours de dette", 0) > 0 else np.nan), 
+            axis=1
+        ) 
         def borner(val):
             if pd.isna(val):
                 return np.nan
