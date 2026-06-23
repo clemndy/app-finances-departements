@@ -223,8 +223,8 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
             liste_indic_temp = []    # On crée une nouvelle liste pour avoir les graphiques avec les données bruts et les données normalisées d'un même indic sur la même ligne
             for indic_temp in indicateurs_a_tracer:
                 liste_indic_temp.append(indic_temp)
+                indic_par_hab_temp = f"{indic_temp} (€/hab)"
                 if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    indic_par_hab_temp = f"{indic_temp} (€/hab)"
                     pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
                 else:
                     pivot[indic_par_hab_temp] = np.nan    # On crée une colonne vide pour quand même afficher un graphe vide dans lequel on ajoutera des infos pour l'utilisateurs
