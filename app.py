@@ -167,11 +167,11 @@ def ajouter_etiquettes_desendettement(axe, df_donnees):
         if pd.notna(val_tracee) and (val_tracee == 15 or val_tracee == -3):
             
             if pd.isna(vraie_valeur) or vraie_valeur == float('inf'):
-                vraie_valeur_texte = "Infini\n(Épargne 0)"
+                vraie_valeur_texte = "Infini\n(Épargne = 0)"
             else:
-                vraie_valeur_texte = f"{vraie_valeur:.1f} ans"
+                vraie_valeur_texte = vraie_valeur:.1f
             
-            offset_y = -10 if val_tracee == 15 else 10
+            offset_y = -15 if val_tracee == 15 else 15
             va_align = "bottom" if val_tracee == 15 else "top"
             
             axe.annotate(
