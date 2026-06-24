@@ -133,7 +133,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
 
         if indic not in df_plot.columns or df_plot[indic].isna().all():
             # Si les données sont manquantes ou non-normalisables, on personnalise le message d'erreur
-            if "(€/hab)" in indic and (indic in indicateurs_calculés):
+            if "(€/hab)" in indic and (indic.replace(' (€/hab)', '') in indicateurs_calculés):
                 label_txt = f"⚠️ {indic.replace(' (€/hab)', '')} non normalisable ⚠️"
             else:
                 label_txt = f"⚠️ {indic} introuvable ou vide ⚠️"
