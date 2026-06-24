@@ -130,7 +130,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         axe = axes_liste[i]
 
         if indic_temp not in df_plot.columns:
-            axe.set_title(f"{indic_temp}\n(Données indisponibles)", fontsize=12, color="gray")
+            axe.set_title(f"{indic_temp}\n⚠️ Données indisponibles", fontsize=12, color="gray")
             continue
             
         sns.lineplot(data=df_plot, x="Exercice", y=indic_temp, hue="Nom 2024 Département", marker="o", ax=axe, linewidth=3)
@@ -279,7 +279,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
                     
             else:    # Si on a vraiment rien à afficher, que ce soit parce qu'on a jamais trouvé la colonne ou que les données n'étaient pas normalisables
                 if "(€/hab)" in indic_temp and ("Capacité" in indic_temp or "Poids" in indic_temp):    # Les noms complets sont "Capacité de désendettement (années)" et "Poids des AIS (%)"
-                    label_txt = f"⚠️ {indic_temp.replace(' (€/hab)', '')} (Non normalisable)"
+                    label_txt = f"⚠️ {indic_temp.replace(' (€/hab)', '')} non normalisable"
                 else:
                     label_txt = f"⚠️ {indic_temp} indisponible"
                 
