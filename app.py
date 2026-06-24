@@ -142,7 +142,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
             axe_indice_i.text(0.5, 0.5, label_txt, fontsize=12, fontweight="bold", va="center", ha="center")
             continue
             
-        sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", markers=True, ax=axe_indice_i, linewidth=3)
+        sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", style="Nom 2024 Département", markers=True, dashes=False, ax=axe_indice_i, linewidth=3)
 
         if par_habitant and not afficher_les_deux and indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)"]:
             titre_axe = f"{indic} (€/hab)"
