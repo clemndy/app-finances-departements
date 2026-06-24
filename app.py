@@ -139,7 +139,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
                 label_txt = f"⚠️ {indic} introuvable ou vide ⚠️"
             
             axe_indice_i.set_title(indic, fontsize=15, fontweight="bold", color="grey")
-            axe_indice_i.text(0.5, 0.5, label_txt, fontsize=15, fontweight="bold", va="center", ha="center")
+            axe_indice_i.text(0.5, 0.5, label_txt, fontsize=10, fontweight="bold", va="center", ha="center")
             continue
             
         sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", marker="o", ax=axe_indice_i, linewidth=3)
