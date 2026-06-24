@@ -24,7 +24,7 @@ colonnes_necessaires = ["Exercice", "Nom 2024 Département", "Code Insee 2024 D�
 colonnes_manquantes = [col for col in colonnes_necessaires if col not in df.columns]
 
 if colonnes_manquantes:
-    st.error(f"🚨 **Données corrompues :** Le fichier source est incomplet. Il manque la ou les colonnes obligatoires suivantes : {', '.join(colonnes_manquantes)}")
+    st.error(f"Erreur : il manque la ou les colonnes suivantes : {', '.join(colonnes_manquantes)}")
     st.stop()
 
 
@@ -118,7 +118,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
     else:
         lignes = (n+1) // 2    # On aura un graphe vide "seul" en + en bas
 
-    fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes))    # Affichage des graphiques en 4:3 avec un coeff de taille en +
+    fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes*0.97))    # Affichage des graphiques en 4:3 avec un coeff de taille en + pour qu'il aient toujours la même taille
     fig.suptitle(titre, fontsize=24, fontweight="bold", y=0.9925) 
 
     if lignes == 1 and colonnes == 1:
