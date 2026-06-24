@@ -29,7 +29,7 @@ if colonnes_manquantes:
 
 
 
-# Indicateurs calculés en utilisant les données OFGL
+# Indicateurs calculés (tous non-normalisables, le code devra être adapté si on calcule de nouveaux indicateurs qui seraient normalisables) en utilisant les données OFGL
 indicateurs_calculés = [
     "Capacité de désendettement (années)", 
     "Poids des AIS (%)"
@@ -110,58 +110,60 @@ annee_max = int(df["Exercice"].max())
 
 # Fonction de génération des graphiques
 def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher_les_deux=False):
+    # On prépare le nombre de graphiques à afficher => combien de lignes et colonnes
     n = len(indicateurs)
     colonnes = 2 if n >= 2 else 1
-    
     if n % 2 == 0:
         lignes = n // colonnes
     else:
         lignes = (n+1) // 2    # On aura un graphe vide "seul" en + en bas
 
-    fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes**0.95))    # Affichage des graphiques en 4:3 avec un coeff de taille en + pour qu'il aient toujours la même taille
+    fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes))    # Affichage des graphiques en 4:3 avec un coeff de taille en + pour qu'il aient toujours la même taille
     fig.suptitle(titre, fontsize=24, fontweight="bold", y=0.9925) 
 
+    # On mets tous les grapheiques dans une liste
     if lignes == 1 and colonnes == 1:
         axes_liste = [axes]
     else:
         axes_liste = axes.flatten()
 
-    for i, indic_temp in enumerate(indicateurs):
-        axe = axes_liste[i]
+    # On affiche tout ce qu'il faut pour chaque graphe
+    for i, indic in enumerate(indicateurs):
+        axe_indice_i = axes_liste[i]
 
-        if indic_temp not in df_plot.columns or df_plot[indic_temp].isna().all():
-            if "(€/hab)" in indic_temp and ("Capacité" in indic_temp or "Poids" in indic_temp):
-                label_txt = f"⚠️ {indic_temp.replace(' (€/hab)', '')} non normalisable"
+        if indic not in df_plot.columns or df_plot[indic].isna().all():
+            # On personnalise le message d'erreur au cas par cas
+            if "(€/hab)" in indic and (indic in indicateurs_calculés):
+                label_txt = f"⚠️ {indic.replace(' (€/hab)', '')} non normalisable ⚠️"
             else:
-                label_txt = f"⚠️ {indic_temp} indisponible"
+                label_txt = f"⚠️ {indic} introuvable ou vide ⚠️"
             
-            axe.set_title(indic_temp, fontsize=15, fontweight="bold", alpha=0.85, color="gray")
-            if "Exercice" in df_plot.columns and not df_plot["Exercice"].isna().all():    # On veut quand afficher un graphe propre même s'il est vide
-                axe.plot(df_plot["Exercice"], [np.nan]*len(df_plot), label=label_txt, color="gray", linestyle="--")
-                axe.set_xlim(df_plot["Exercice"].min() - 0.2, df_plot["Exercice"].max() + 0.2)
-                axe.set_xticks(df_plot["Exercice"].unique())
-            axe.legend(loc="best", fontsize="small")
+            axe_indice_i.set_title(indic, fontsize=15, fontweight="bold", alpha=0.85)
+            axe_indice_i.plot(df_plot["Exercice"], []*len(df_plot), label=label_txt, color="gray", linestyle="--")
+            axe_indice_i.set_xlim(df_plot["Exercice"].min() - 0.2, df_plot["Exercice"].max() + 0.2)
+            axe_indice_i.set_xticks(df_plot["Exercice"].unique())
+            axe_indice_i.legend(loc="best", fontsize="small")
             continue
             
-        sns.lineplot(data=df_plot, x="Exercice", y=indic_temp, hue="Nom 2024 Département", marker="o", ax=axe, linewidth=3)
+        sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", marker="o", ax=axe_indice_i, linewidth=3)
 
-        if par_habitant and not afficher_les_deux and indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)"]:
-            titre_axe = f"{indic_temp} (€/hab)"
+        if par_habitant and not afficher_les_deux and indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)"]:
+            titre_axe = f"{indic} (€/hab)"
         else:
-            titre_axe = indic_temp
+            titre_axe = indic
                 
-        axe.set_title(titre_axe, fontsize=15, fontweight="bold", alpha=0.85)
-        axe.set_xlim(df_plot["Exercice"].min() - 0.2, df_plot["Exercice"].max() + 0.2)
-        axe.set_xticks(df_plot["Exercice"].unique())
+        axe_indice_i.set_title(titre_axe, fontsize=15, fontweight="bold", alpha=0.85)
+        axe_indice_i.set_xlim(df_plot["Exercice"].min() - 0.2, df_plot["Exercice"].max() + 0.2)
+        axe_indice_i.set_xticks(df_plot["Exercice"].unique())
         
-        if indic_temp == "Capacité de désendettement (années)":
-            axe.axhline(12, color="darkred", linestyle="--", linewidth=1, label="Surendettement avéré")
-            axe.axhline(9, color="red", linestyle="--", linewidth=1, label="Surendettement trop élevé")
-            axe.axhline(6, color="darkorange", linestyle="--", linewidth=1, label="Surendettement élevé")
-            axe.axhline(3, color="green", linestyle="--", linewidth=1, label="Endettement maîtrisé")
-            ajouter_etiquettes_desendettement(axe, df_plot)
-            if axe.get_legend() is not None:
-                axe.legend(loc="best", fontsize="small")
+        if indic == "Capacité de désendettement (années)":
+            axe_indice_i.axhline(12, color="darkred", linestyle="--", linewidth=1, label="Surendettement avéré")
+            axe_indice_i.axhline(9, color="red", linestyle="--", linewidth=1, label="Surendettement trop élevé")
+            axe_indice_i.axhline(6, color="darkorange", linestyle="--", linewidth=1, label="Surendettement élevé")
+            axe_indice_i.axhline(3, color="green", linestyle="--", linewidth=1, label="Endettement maîtrisé")
+            ajouter_etiquettes_desendettement(axe_indice_i, df_plot)
+            if axe_indice_i.get_legend() is not None:
+                axe_indice_i.legend(loc="best", fontsize="small")
 
     if len(axes_liste) - n > 0:    # Si on est dans le cas ou le nombre d'indicateurs est pair, on supprime le dernier axe
         fig.delaxes(axes_liste[-1])
@@ -248,28 +250,28 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
         
     indicateurs_a_tracer = indicateurs.copy()
 
-    for indic_temp in indicateurs_a_tracer:
-         if indic_temp not in pivot.columns:
-            pivot[indic_temp] = np.nan
+    for indic in indicateurs_a_tracer:
+         if indic not in pivot.columns:
+            pivot[indic] = np.nan
       
     if par_habitant:
         if afficher_les_deux:
             liste_indic_temp = []    # On crée une nouvelle liste pour avoir les graphiques avec les données brutes et les données normalisées d'un même indic sur la même ligne
-            for indic_temp in indicateurs_a_tracer:
-                liste_indic_temp.append(indic_temp)
-                indic_par_hab_temp = f"{indic_temp} (€/hab)"
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
+            for indic in indicateurs_a_tracer:
+                liste_indic_temp.append(indic)
+                indic_par_hab_temp = f"{indic} (€/hab)"
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
                 else:
                     pivot[indic_par_hab_temp] = np.nan    # On crée une colonne vide pour quand même afficher un graphe vide dans lequel on ajoutera des infos pour l'utilisateurs
                 liste_indic_temp.append(indic_par_hab_temp)
             indicateurs_a_tracer = liste_indic_temp
         else:
-            for indic_temp in indicateurs_a_tracer:
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
+            for indic in indicateurs_a_tracer:
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
                 else:                                                                                                                                                           # un != (car NaN != 0 renvoit True et derrière ça marcherait)
-                    pivot[indic_temp] = np.nan # Pareil que précédemment                                                                                                          # au lieu de > mais ce ne serait pas "propre"
+                    pivot[indic] = np.nan # Pareil que précédemment                                                                                                          # au lieu de > mais ce ne serait pas "propre"
    
     if afficher_les_deux:                                                                                                                                                           
         titre_graphe = f"Analyse croisée du département : {nom_dep}"
@@ -352,28 +354,28 @@ def comparer_departements(df_arg, liste_codes_dep, intervalle_annees, indicateur
         
     indicateurs_a_tracer = indicateurs.copy()
 
-    for indic_temp in indicateurs_a_tracer:
-         if indic_temp not in pivot.columns:
-            pivot[indic_temp] = np.nan
+    for indic in indicateurs_a_tracer:
+         if indic not in pivot.columns:
+            pivot[indic] = np.nan
       
     if par_habitant:
         if afficher_les_deux:
             liste_indic_temp = []    # On crée une nouvelle liste pour avoir les graphiques avec les données brutes et les données normalisées d'un même indic sur la même ligne
-            for indic_temp in indicateurs_a_tracer:
-                liste_indic_temp.append(indic_temp)
-                indic_par_hab_temp = f"{indic_temp} (€/hab)"
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
+            for indic in indicateurs_a_tracer:
+                liste_indic_temp.append(indic)
+                indic_par_hab_temp = f"{indic} (€/hab)"
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
                 else:
                     pivot[indic_par_hab_temp] = np.nan    # On crée une colonne vide pour quand même afficher un graphe vide dans lequel on ajoutera des infos pour l'utilisateurs
                 liste_indic_temp.append(indic_par_hab_temp)
             indicateurs_a_tracer = liste_indic_temp
         else:
-            for indic_temp in indicateurs_a_tracer:
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
+            for indic in indicateurs_a_tracer:
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
                 else:                                                                                                                                                                                                                                                                                                                                   # un != (car NaN != 0 renvoit True et derrière ça marcherait)
-                    pivot[indic_temp] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
+                    pivot[indic] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
 
     fig = generer_graphiques(pivot, "Analyse Financière Comparative", indicateurs_a_tracer, par_habitant, afficher_les_deux)
 
@@ -434,28 +436,28 @@ def comparer_departement_strate(df_arg, code_dep, intervalle_annees, indicateurs
         
     indicateurs_a_tracer = indicateurs.copy()
 
-    for indic_temp in indicateurs_a_tracer:
-         if indic_temp not in pivot.columns:
-            pivot[indic_temp] = np.nan
+    for indic in indicateurs_a_tracer:
+         if indic not in pivot.columns:
+            pivot[indic] = np.nan
       
     if par_habitant:
         if afficher_les_deux:
             liste_indic_temp = []    # On crée une nouvelle liste pour avoir les graphiques avec les données brutes et les données normalisées d'un même indic sur la même ligne
-            for indic_temp in indicateurs_a_tracer:
-                liste_indic_temp.append(indic_temp)
-                indic_par_hab_temp = f"{indic_temp} (€/hab)"
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
+            for indic in indicateurs_a_tracer:
+                liste_indic_temp.append(indic)
+                indic_par_hab_temp = f"{indic} (€/hab)"
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
                 else:
                     pivot[indic_par_hab_temp] = np.nan    # On crée une colonne vide pour quand même afficher un graphe vide dans lequel on ajoutera des infos pour l'utilisateurs
                 liste_indic_temp.append(indic_par_hab_temp)
             indicateurs_a_tracer = liste_indic_temp
         else:
-            for indic_temp in indicateurs_a_tracer:
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
+            for indic in indicateurs_a_tracer:
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
                 else:                                                                                                                                                                                                                                                                                                                                   # un != (car NaN != 0 renvoit True et derrière ça marcherait)
-                    pivot[indic_temp] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
+                    pivot[indic] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
 
     df_cible = pivot[pivot["Code Insee 2024 Département"] == code_dep].copy()
     df_autres = pivot[pivot["Code Insee 2024 Département"] != code_dep].copy()
@@ -536,28 +538,28 @@ def comparer_departement_strate_metro(df_arg, code_dep, intervalle_annees, indic
         
     indicateurs_a_tracer = indicateurs.copy()
 
-    for indic_temp in indicateurs_a_tracer:
-         if indic_temp not in pivot.columns:
-            pivot[indic_temp] = np.nan
+    for indic in indicateurs_a_tracer:
+         if indic not in pivot.columns:
+            pivot[indic] = np.nan
       
     if par_habitant:
         if afficher_les_deux:
             liste_indic_temp = []    # On crée une nouvelle liste pour avoir les graphiques avec les données brutes et les données normalisées d'un même indic sur la même ligne
-            for indic_temp in indicateurs_a_tracer:
-                liste_indic_temp.append(indic_temp)
-                indic_par_hab_temp = f"{indic_temp} (€/hab)"
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
+            for indic in indicateurs_a_tracer:
+                liste_indic_temp.append(indic)
+                indic_par_hab_temp = f"{indic} (€/hab)"
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic_par_hab_temp] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)
                 else:
                     pivot[indic_par_hab_temp] = np.nan    # On crée une colonne vide pour quand même afficher un graphe vide dans lequel on ajoutera des infos pour l'utilisateurs
                 liste_indic_temp.append(indic_par_hab_temp)
             indicateurs_a_tracer = liste_indic_temp
         else:
-            for indic_temp in indicateurs_a_tracer:
-                if indic_temp not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
-                    pivot[indic_temp] = pivot.apply(lambda ligne: ligne[indic_temp] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
+            for indic in indicateurs_a_tracer:
+                if indic not in ["Capacité de désendettement (années)", "Poids des AIS (%)", "Capacité de désendettement (vraie)"]:
+                    pivot[indic] = pivot.apply(lambda ligne: ligne[indic] / ligne["Population totale"] if ligne.get("Population totale", 0) > 0 else np.nan, axis=1)    # remarque : on pourrait mettre
                 else:                                                                                                                                                                                                                                                                                                                                   # un != (car NaN != 0 renvoit True et derrière ça marcherait)
-                    pivot[indic_temp] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
+                    pivot[indic] = np.nan # Pareil que précédemment                                                                                                                                                                                                                                                                                # au lieu de > mais ce ne serait pas "propre"
 
     df_cible = pivot[pivot["Code Insee 2024 Département"] == code_dep].copy()
     cols_mean = [c for c in indicateurs_a_tracer + ["Capacité de désendettement (vraie)"] if c in pivot.columns]
@@ -621,7 +623,7 @@ for main_cat, subcats in sorted(dico_indicateurs.items()):
             if subcat_name != "Indicateurs":
                 st.markdown(f"**{subcat_name}**")
             
-            defauts_cat = [indic_temp for indic_temp in indicators_list if indic_temp in indicateurs_calculés]
+            defauts_cat = [indic for indic in indicators_list if indic in indicateurs_calculés]
             
             choix = st.multiselect(
                 label=subcat_name,
