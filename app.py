@@ -128,9 +128,8 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         axes_liste = axes.flatten()
 
     # On affiche tout ce qu'il faut pour chaque graphe
-    for i, axe_indice_i in enumerate(axes_liste[:n]):
+    for i, axe_indice_i in enumerate(axes_liste[]):
         
-        # --- CAS 1 : LOGIQUE DE SUPERPOSITION (Pour un seul département) ---
         if superposer:
             if afficher_les_deux:
                 axe_indice_i.set_title("Valeurs brutes" if i == 0 else "Valeurs normalisées (€/hab)", fontsize=15, fontweight="bold", alpha=0.85)
@@ -148,7 +147,6 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
             else:
                 axe_indice_i.text(0.5, 0.5, "⚠️ Aucun indicateur disponible ⚠️", fontsize=12, fontweight="bold", va="center", ha="center")
 
-        # --- CAS 2 : COMPORTEMENT NORMAL D'ORIGINE (Un indicateur par graphe) ---
         else:
             indic = indicateurs[i]
             if indic not in df_plot.columns or df_plot[indic].isna().all():
