@@ -128,7 +128,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
         axes_liste = axes.flatten()
 
     # On affiche tout ce qu'il faut pour chaque graphe
-    for i, axe_indice_i in enumerate(axes_liste[]):
+    for i, axe_indice_i in enumerate(axes_liste):
         
         if superposer:
             if afficher_les_deux:
