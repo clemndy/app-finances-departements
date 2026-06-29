@@ -120,17 +120,18 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
 
     fig, axes = plt.subplots(lignes, colonnes, figsize=(4*2*colonnes, 3*2*lignes))    # Affichage des graphiques en 4:3 avec un coeff de taille en + pour qu'il aient toujours la même taille
     fig.suptitle(titre, fontsize=24, fontweight="bold", y=0.9925) 
-
-    # On mets tous les grapheiques dans une liste
+    
+    # On mets tous les graphiques dans une liste
     if lignes == 1 and colonnes == 1:
         axes_liste = [axes]
     else:
         axes_liste = axes.flatten()
 
     # On affiche tout ce qu'il faut pour chaque graphe
-    for i, axe_indice_i in enumerate(axes_liste[:n]):    # On met un coup de slicing pour eviter de faire un tour en trop quand on a un nombre impairs d'indicateur, ce qui donnerait un erreur
+    for i, axe_indice_i in enumerate(axes_liste[:n]):    # On met un coup de slicing pour eviter de faire un tour en trop quand on a un nombre impairs d'indicateur (cf le graphique vide de fin)
         
         if superposer:
+            # Ici i=0 ou i=1
             if afficher_les_deux:
                 axe_indice_i.set_title("Valeurs brutes" if i == 0 else "Valeurs normalisées (€/hab)", fontsize=15, fontweight="bold", alpha=0.85)
                 # On filtre les indicateurs correspondants à l'axe courant (X brut pour l'axe 0, X/hab pour l'axe 1)
@@ -139,10 +140,10 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
                 axe_indice_i.set_title("Valeurs normalisées (€/hab)" if par_habitant else "Valeurs brutes", fontsize=15, fontweight="bold", alpha=0.85)
                 indics_axe = indicateurs
 
-            # On "fond" (melt) le tableau pour que Seaborn comprenne qu'on veut superposer plusieurs colonnes d'indicateurs
-            df_melt = df_plot.melt(id_vars=["Exercice"], value_vars=[ind for ind in indics_axe if ind in df_plot.columns], var_name="Indicateur", value_name="Valeur")
+            # On melt le tableau (c'est l'inverse du pivot) pour que Seaborn comprenne qu'on veut superposer plusieurs colonnes d'indicateurs
+            df_melt = df_plot.melt(id_vars=["Exercice"], value_vars=[ind for ind in indics_axe], var_name="Indicateur", value_name="Valeur")
             
-            if not df_melt.empty and df_melt["Valeur"].notna().any():
+            if df_melt["Valeur"].notna().any():
                 sns.lineplot(data=df_melt, x="Exercice", y="Valeur", hue="Indicateur", style="Indicateur", markers=True, dashes=False, ax=axe_indice_i, linewidth=3)
             else:
                 axe_indice_i.text(0.5, 0.5, "⚠️ Aucun indicateur disponible ⚠️", fontsize=12, fontweight="bold", va="center", ha="center")
@@ -229,7 +230,7 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
     pivot = df_temp[serie_filtre].pivot_table(index=index_colonnes, columns="Agrégat", values="Montant", aggfunc="sum").reset_index()    # aggfunc permet d'avoir la somme de toutes les lignes d'épargne nette par exemple
     if pivot.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
     
     nom_dep = pivot["Nom 2024 Département"].iloc[0]    # On récupère le nom du département pour plus tard l'afficher et pas avoir que les numéros de départements
@@ -338,7 +339,7 @@ def comparer_departements(df_arg, liste_codes_dep, intervalle_annees, indicateur
     
     if pivot.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
 
     if "Capacité de désendettement (années)" in indicateurs:
@@ -405,7 +406,7 @@ def comparer_departement_strate(df_arg, code_dep, intervalle_annees, indicateurs
     df_dep_cible = df_temp[df_temp["Code Insee 2024 Département"] == code_dep]
     if df_dep_cible.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
         
     strate = df_dep_cible["Strate population 2024"].iloc[0]
@@ -420,7 +421,7 @@ def comparer_departement_strate(df_arg, code_dep, intervalle_annees, indicateurs
     
     if pivot.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
 
     if "Capacité de désendettement (années)" in indicateurs:
@@ -507,7 +508,7 @@ def comparer_departement_strate_metro(df_arg, code_dep, intervalle_annees, indic
     df_dep_cible = df_temp[df_temp["Code Insee 2024 Département"] == code_dep]
     if df_dep_cible.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
         
     strate = df_dep_cible["Strate population 2024"].iloc[0]
@@ -522,7 +523,7 @@ def comparer_departement_strate_metro(df_arg, code_dep, intervalle_annees, indic
     
     if pivot.empty: # Sécurité
         fig, ax = plt.subplots()
-        ax.text(0.5, 0.5, "Aucune donnée disponible", ha='center', va='center')
+        ax.text(0.5, 0.5, "Aucune donnée disponible", fontsize=12, fontweight="bold", ha='center', va='center')
         return fig, pd.DataFrame()
 
     if "Capacité de désendettement (années)" in indicateurs:
