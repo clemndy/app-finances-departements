@@ -131,16 +131,15 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
     for i, axe_indice_i in enumerate(axes_liste[:n]):    # On met un coup de slicing pour eviter de faire un tour en trop quand on a un nombre impairs d'indicateur (cf le graphique vide de fin)
         
         if superposer:
-            # Ici i=0 ou i=1
+            # Ici, i=0 ou i=1
             if afficher_les_deux:
                 axe_indice_i.set_title("Valeurs brutes" if i == 0 else "Valeurs normalisées (€/hab)", fontsize=15, fontweight="bold", alpha=0.85)
-                # On filtre les indicateurs correspondants à l'axe courant (X brut pour l'axe 0, X/hab pour l'axe 1)
                 indics_axe = [ind for ind in indicateurs if ("(€/hab)" in ind) == (i == 1)]
             else:
                 axe_indice_i.set_title("Valeurs normalisées (€/hab)" if par_habitant else "Valeurs brutes", fontsize=15, fontweight="bold", alpha=0.85)
                 indics_axe = indicateurs
 
-            # On melt le tableau (c'est l'inverse du pivot) pour que Seaborn comprenne qu'on veut superposer plusieurs colonnes d'indicateurs
+            # On melt le tableau (c'est l'inverse du pivot) pour pouvoir superposer les indicateurs sur le graphique
             df_melt = df_plot.melt(id_vars=["Exercice"], value_vars=[ind for ind in indics_axe], var_name="Indicateur", value_name="Valeur")
             
             if df_melt["Valeur"].notna().any():
@@ -159,7 +158,7 @@ def generer_graphiques(df_plot, titre, indicateurs, par_habitant=False, afficher
             sns.lineplot(data=df_plot, x="Exercice", y=indic, hue="Nom 2024 Département", style="Nom 2024 Département", markers=True, dashes=False, ax=axe_indice_i, linewidth=3)
             axe_indice_i.set_title(f"{indic} (€/hab)" if (par_habitant and not afficher_les_deux and indic not in indicateurs_calculés) else indic, fontsize=15, fontweight="bold", alpha=0.85)
 
-        # --- CONFIGURATIONS COMMUNES (Communes aux deux comportements pour éviter de dupliquer du code) ---
+        # Mêmes abscisses pour tout les graphes
         axe_indice_i.set_xlim(df_plot["Exercice"].min() - 0.2, df_plot["Exercice"].max() + 0.2)
         axe_indice_i.set_xticks(df_plot["Exercice"].unique())
         
@@ -303,7 +302,6 @@ def analyser_un_departement(df_arg, code_dep, intervalle_annees, indicateurs, pa
 # FONCTIONS "COEUR" DE COMPARAISON ET RECHERCHE
 #####
 ##########
-
 def departements_meme_strate(df_arg, code_dep, mm_region=False):
     df_temp = df_arg.copy()
     code_dep = str(code_dep)
@@ -604,7 +602,6 @@ def comparer_departement_strate_metro(df_arg, code_dep, intervalle_annees, indic
 # L'INTERFACE GRAPHIQUE UTILISATEUR (STREAMLIT)
 #####
 ##########
-
 st.title("📊 Outil d'analyse financière de départements")
 st.markdown("Bienvenue dans l'interface d'analyse. Choisissez une fonctionnalité du menu situé à votre gauche.")
 
